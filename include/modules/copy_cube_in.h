@@ -20,7 +20,7 @@ class CopyCubeIn {
     static constexpr uint32_t ROW_SIZE = InputTraits<MM_CFG, TAG>::GetRowSize();
     static constexpr uint32_t COL_SIZE = InputTraits<MM_CFG, TAG>::GetColSize();
 
-    MATMUL_USE_TEMPLATE_MODULE(CopyInBuffer, TYPE, TAG);
+    MATMUL_USE_MODULE_ON(CopyInBuffer, TAG);
 
 public:
     void SetAddr(const GlobalTensor<typename TYPE::T>& input) {

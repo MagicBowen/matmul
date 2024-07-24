@@ -23,7 +23,7 @@ inline constexpr auto MATMUL_MODULE(NAME) -> decltype(auto) {   \
     return MATMUL_CAST_TO(NAME);                                \
 }
 
-#define MATMUL_USE_TEMPLATE_MODULE(NAME, ...)                   \
+#define MATMUL_USE_MODULE_ON(NAME, ...)                   \
 inline constexpr auto MATMUL_MODULE(NAME) -> decltype(auto) {   \
     return MATMUL_CAST_TO(template NAME<__VA_ARGS__>);          \
 }

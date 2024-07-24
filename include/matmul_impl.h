@@ -22,8 +22,8 @@ class MatmulImpl
 , MATMUL_IMPORT_MODULE(IterateController)
 , MATMUL_IMPORT_MODULE(CopyCubeInA)
 , MATMUL_IMPORT_MODULE(CopyCubeInB)
-, MATMUL_IMPORT_MODULE(template CopyInBuffer<A_TYPE, InputTag::LEFT>)
-, MATMUL_IMPORT_MODULE(template CopyInBuffer<B_TYPE, InputTag::RIGHT>)
+, MATMUL_IMPORT_MODULE(CopyInBufferA)
+, MATMUL_IMPORT_MODULE(CopyInBufferB)
 , MATMUL_IMPORT_MODULE(MMad)
 {
     using L0cT = typename A_TYPE::T;
@@ -38,13 +38,22 @@ public:
     MATMUL_ALLOW_USING(IterateController);
     MATMUL_ALLOW_USING(CopyCubeInA);
     MATMUL_ALLOW_USING(CopyCubeInB);
+    MATMUL_ALLOW_USING(CopyInBufferA);
+    MATMUL_ALLOW_USING(CopyInBufferB);
     MATMUL_ALLOW_USING(MMad);
 
-    template<typename TYPE, InputTag TAG>
-    MATMUL_ALLOW_USING_TEMPLATE(CopyInBuffer, TYPE, TAG);
+    template<InputTag TAG>
+    using CopyInBuffer = std::conditional_t<TAG == InputTag::LEFT, CopyInBufferA, CopyInBufferB>;
 
-    template<typename IMPL, typename INPUT_TYPE, const auto& MM_CFG_, InputTag TAG>
-    friend class matmul::CopyInBuffer;
+    // template<typename TYPE, InputTag TAG>
+    // MATMUL_ALLOW_USING_TEMPLATE(CopyInBuffer, TYPE, TAG);
+
+    // template<typename IMPL, typename INPUT_TYPE, const auto& MM_CFG_, InputTag TAG>
+    // friend class matmul::CopyInBuffer;
+
+    // template<typename TYPE, InputTag TAG>
+    // friend class MATMUL_POLICY<MatmulImpl<A_TYPE, B_TYPE, C_TYPE, BIAS_TYPE, MM_CFG, MM_CB, MATMUL_POLICY>, A_TYPE, B_TYPE, C_TYPE, BIAS_TYPE, MM_CFG, MM_CB>::CopyInBuffer;
+
 
 public:
     void Init(const TCubeTiling* tiling) {
