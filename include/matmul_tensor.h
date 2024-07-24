@@ -40,7 +40,7 @@ struct GlobalTensor {
         this->length = length;
     }
 
-    void GetAddr() {
+    T* GetAddr() {
         return this->addr;
     }
 

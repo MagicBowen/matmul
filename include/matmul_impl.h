@@ -20,6 +20,11 @@ template <typename A_TYPE, typename B_TYPE, typename C_TYPE, typename BIAS_TYPE,
 class MatmulImpl
 : MATMUL_IMPORT_MODULE(Scheduler)
 , MATMUL_IMPORT_MODULE(IterateController)
+, MATMUL_IMPORT_MODULE(CopyCubeInA)
+, MATMUL_IMPORT_MODULE(CopyCubeInB)
+, MATMUL_IMPORT_MODULE(template CopyInBuffer<A_TYPE, InputTag::LEFT>)
+, MATMUL_IMPORT_MODULE(template CopyInBuffer<B_TYPE, InputTag::RIGHT>)
+, MATMUL_IMPORT_MODULE(MMad)
 {
     using L0cT = typename A_TYPE::T;
     using SrcT = typename A_TYPE::T;
@@ -31,30 +36,63 @@ class MatmulImpl
 public:
     MATMUL_ALLOW_USING(Scheduler);
     MATMUL_ALLOW_USING(IterateController);
+    MATMUL_ALLOW_USING(CopyCubeInA);
+    MATMUL_ALLOW_USING(CopyCubeInB);
+    MATMUL_ALLOW_USING(MMad);
+
+    template<typename TYPE, InputTag TAG>
+    MATMUL_ALLOW_USING_TEMPLATE(CopyInBuffer, TYPE, TAG);
+
+    template<typename IMPL, typename INPUT_TYPE, const auto& MM_CFG_, InputTag TAG>
+    friend class matmul::CopyInBuffer;
 
 public:
     void Init(const TCubeTiling* tiling) {
         var.tiling = tiling;
-        var.singleCoreM_ = tiling->singleCoreM;
-        var.singleCoreN_ = tiling->singleCoreN;
-        var.singleCoreK_ = tiling->singleCoreK;
+        var.singleCoreM_ = MM_CFG.singleCoreM;
+        var.singleCoreN_ = MM_CFG.singleCoreN;
+        var.singleCoreK_ = MM_CFG.singleCoreK;
+        var.mIter = MM_CFG.singleCoreM / MM_CFG.basicM;
+        var.nIter = MM_CFG.singleCoreN / MM_CFG.basicN;
+        var.kIter = MM_CFG.singleCoreK / MM_CFG.basicK;
     }
 
-    void SetTensorA(const GlobalTensor<SrcAT>&);
-    void SetTensorA(const LocalTensor<SrcAT>&);
-    void SetTensorB(const GlobalTensor<SrcBT>&);
-    void SetTensorB(const LocalTensor<SrcBT>&);
-    void SetBias(const GlobalTensor<BiasT>&);
-    void SetBias(const LocalTensor<BiasT>&);
+    void SetTensorA(const GlobalTensor<SrcAT>& leftMatrix) {
+        CopyCubeInA::SetAddr(leftMatrix);
+    }
 
-    void GetTensorC(const LocalTensor<DstT>&);
-    void GetTensorC(const GlobalTensor<DstT>&);
+    void SetTensorA(const LocalTensor<SrcAT>& leftMatrix) {
+        CopyCubeInA::SetAddr(leftMatrix);
+    }
+
+    void SetTensorB(const GlobalTensor<SrcBT>& rightMatrix) {
+        CopyCubeInB::SetAddr(rightMatrix);
+    }
+
+    void SetTensorB(const LocalTensor<SrcBT>& rightMatrix) {
+        CopyCubeInB::SetAddr(rightMatrix);
+    }
+
+    void SetBias(const GlobalTensor<BiasT>& bias) {
+    }
+
+    void SetBias(const LocalTensor<BiasT>& bias) {
+    }
+
+    void GetTensorC(const LocalTensor<DstT>& tensor) {
+    }
+
+    void GetTensorC(const GlobalTensor<DstT>& tensor) {
+    }
 
     bool Iterate() {
-        return IterateController::IsFinished();
+        return false;
     }
 
-    void IterateAll(const GlobalTensor<DstT>&);
+    void IterateAll(const GlobalTensor<DstT>&) {
+
+    }
+
     void IterateAll(const LocalTensor<DstT>&) {
         Scheduler::Schedule();
     }

@@ -61,6 +61,16 @@ struct MatmulType {
 
 using half = _Float16;
 
+constexpr bool PhyPosIsL1(TPosition pos)
+{
+    if (pos == TPosition::A1 || pos == TPosition::B1 ||
+        pos == TPosition::SHM || pos == TPosition::TSCM) {
+        return true;
+    }
+    return false;
+}
+
+
 }
 
 #endif

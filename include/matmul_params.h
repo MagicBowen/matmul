@@ -15,6 +15,10 @@ struct MatmulParams {
     uint32_t singleCoreM_{0};
     uint32_t singleCoreN_{0};
     uint32_t singleCoreK_{0};
+
+    uint32_t mIter{0};
+    uint32_t nIter{0};
+    uint32_t kIter{0};
 };
 
 }

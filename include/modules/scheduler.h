@@ -13,19 +13,14 @@ namespace matmul {
 template<typename IMPL, const auto& MM_CFG>
 class Scheduler {
     MATMUL_USE_MODULE(IterateController);
+    MATMUL_USE_MODULE(MMad);
 
 public:
-    bool ScheduleOnce() {
-        if (MATMUL_MODULE(IterateController).IsFinished()) {
+    bool Schedule() {
+        if (MATMUL_MODULE(IterateController).MoveNext()) {
             return false;
         }
         return true;
-    }
-
-    void Schedule() {
-        do {
-
-        } while(MATMUL_MODULE(IterateController).MoveNext());
     }
 };
 
