@@ -16,8 +16,6 @@ class CopyInBuffer {
 public:
     void Init() {
         Clear();
-
-        printf("%d\n", MATMUL_CONTEXT().singleCoreM_);
     }
 
     LocalTensor<TYPE> AllocTensor() {
