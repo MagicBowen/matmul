@@ -8,7 +8,7 @@
 namespace matmul {
 
 struct MatmulDfxCfg {
-    static constexpr bool ENABLE = false;
+    static constexpr bool ENABLE = true;
 };
 
 }

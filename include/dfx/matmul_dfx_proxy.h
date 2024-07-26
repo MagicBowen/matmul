@@ -18,22 +18,24 @@ struct MatmulDfxProxy : T {                                                 \
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-#define MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC)                          \
+#define MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC)                         \
 template <typename... Args>                                                 \
 auto FUNC(Args&&... args) -> std::enable_if_t<!std::is_void_v<              \
 decltype((MODULE().MODULE::FUNC)(std::forward<Args>(args)...))>,            \
 decltype((MODULE().MODULE::FUNC)(std::forward<Args>(args)...))>{            \
-    ModuleDFXHandler::PreCall(#MODULE, #FUNC, std::forward<Args>(args)...); \
+    constexpr MatmulDfxFuncInfo info{#MODULE, #FUNC, __COUNTER__};          \
+    MatmulDfxHandler::PreCall(info, std::forward<Args>(args)...);           \
     auto ret = (M_.MODULE::FUNC)(std::forward<Args>(args)...);              \
-    ModuleDFXHandler::PostCall(#MODULE, #FUNC, ret);                        \
+    MatmulDfxHandler::PostCall(info, ret);                                  \
     return ret;                                                             \
 }                                                                           \
 template <typename... Args>                                                 \
 auto FUNC(Args&&... args) -> std::enable_if_t<std::is_void_v<               \
 decltype((MODULE().MODULE::FUNC)(std::forward<Args>(args)...))>> {          \
-    ModuleDFXHandler::PreCall(#MODULE, #FUNC, std::forward<Args>(args)...); \
+    constexpr MatmulDfxFuncInfo info{#MODULE, #FUNC, __COUNTER__};          \
+    MatmulDfxHandler::PreCall(info, std::forward<Args>(args)...);           \
     (M_.MODULE::FUNC)(std::forward<Args>(args)...);                         \
-    ModuleDFXHandler::PostCall(#MODULE, #FUNC);                             \
+    MatmulDfxHandler::PostCall(info);                                       \
 }   
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,67 +44,67 @@ decltype((MODULE().MODULE::FUNC)(std::forward<Args>(args)...))>> {          \
 MATMUL_COUNT_ARGS_IMPL(__VA_ARGS__, 9, 8, 7, 6, 5, 4, 3, 2, 1)
 
 #define MATMUL_DEF_PROXY_FUNC_1(M_, MODULE, FUNC1)                          \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC1)
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC1)
 
 #define MATMUL_DEF_PROXY_FUNC_2(M_, MODULE, FUNC1, FUNC2)                   \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC1)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC2)
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC1)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC2)
 
 #define MATMUL_DEF_PROXY_FUNC_3(M_, MODULE, FUNC1, FUNC2, FUNC3)            \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC1)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC2)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC3)
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC1)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC2)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC3)
 
 #define MATMUL_DEF_PROXY_FUNC_4(M_, MODULE, FUNC1, FUNC2, FUNC3, FUNC4)     \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC1)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC2)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC3)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC4)
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC1)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC2)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC3)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC4)
 
 #define MATMUL_DEF_PROXY_FUNC_5(M_, MODULE, FUNC1, FUNC2, FUNC3, FUNC4, FUNC5) \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC1)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC2)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC3)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC4)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC5)
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC1)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC2)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC3)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC4)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC5)
 
 #define MATMUL_DEF_PROXY_FUNC_6(M_, MODULE, FUNC1, FUNC2, FUNC3, FUNC4, FUNC5, FUNC6) \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC1)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC2)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC3)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC4)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC5)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC6)
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC1)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC2)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC3)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC4)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC5)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC6)
 
 #define MATMUL_DEF_PROXY_FUNC_7(M_, MODULE, FUNC1, FUNC2, FUNC3, FUNC4, FUNC5, FUNC6, FUNC7) \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC1)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC2)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC3)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC4)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC5)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC6)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC7)
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC1)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC2)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC3)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC4)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC5)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC6)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC7)
 
 #define MATMUL_DEF_PROXY_FUNC_8(M_, MODULE, FUNC1, FUNC2, FUNC3, FUNC4, FUNC5, FUNC6, FUNC7, FUNC8) \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC1)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC2)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC3)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC4)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC5)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC6)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC7)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC8)
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC1)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC2)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC3)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC4)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC5)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC6)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC7)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC8)
 
 #define MATMUL_DEF_PROXY_FUNC_9(M_, MODULE, FUNC1, FUNC2, FUNC3, FUNC4, FUNC5, FUNC6, FUNC7, FUNC8, FUNC9) \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC1)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC2)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC3)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC4)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC5)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC6)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC7)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC8)                                 \
-MATMUL_DEF_DFX_PROXY_FUN(M_, MODULE, FUNC9)
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC1)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC2)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC3)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC4)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC5)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC6)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC7)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC8)                                \
+MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC9)
 
 #define MATMUL_DEF_DFX_FUNCS_IMPL2(N, M_, MODULE, ...)                      \
 MATMUL_DEF_PROXY_FUNC_##N(M_, MODULE, __VA_ARGS__)

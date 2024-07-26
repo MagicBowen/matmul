@@ -9,23 +9,38 @@
 
 namespace matmul {
 
-struct ModuleDFXHandler {
+struct MatmulDfxFuncInfo {
+    const char* module;
+    const char* func;
+    uint32_t funcId;
+};
+
+inline std::ostream& operator<<(std::ostream& os, const MatmulDfxFuncInfo& info) {
+    os << "function(" << info.module << "::" << info.func << ", " << info.funcId << ")";
+    return os;
+}
+
+struct MatmulDfxHandler {
     template<typename... Args>
-    static void PreCall(const char* module, const char* func, Args&&... args) {
+    static void PreCall(const MatmulDfxFuncInfo& info, Args&&... args) {
         std::cout << "------------------------------------------------" << std::endl;
-        std::cout << "【DFX FUNCTION ENTER】: function : " << module << "::" << func << ", params : ";
-        ((std::cout << std::forward<Args>(args) << "; "), ...);
-        std::cout << std::endl;
+        std::cout << "【DFX FUNCTION ENTER】: " << info << ", params(";
+        if constexpr (sizeof...(args) > 0) {
+            ((std::cout << std::forward<Args>(args) << ";"), ...);
+        } else {
+            std::cout << "void";
+        }
+        std::cout << ")" << std::endl;
     }
 
     template<typename RT>
-    static void PostCall(const char* module, const char* func, const RT& ret) {
-        std::cout  << "【DFX FUNCTION EXIT 】: function : " << module << "::" << func << ", return : " << ret << ";" << std::endl;
+    static void PostCall(const MatmulDfxFuncInfo& info, const RT& ret) {
+        std::cout  << "【DFX FUNCTION EXIT 】: " << info << ", return(" << ret << ")" << std::endl;
         std::cout << "------------------------------------------------" << std::endl;
     }
 
-    static void PostCall(const char* module, const char* func) {
-        std::cout  << "【DFX FUNCTION EXIT 】: function : " << module << "::" << func << ", return : void" << ";" <<  std::endl;
+    static void PostCall(const MatmulDfxFuncInfo& info) {
+        std::cout  << "【DFX FUNCTION EXIT 】: " << info << ", return(void)" <<  std::endl;
         std::cout << "------------------------------------------------" << std::endl;
     }
 };
