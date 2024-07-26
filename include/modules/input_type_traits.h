@@ -2,18 +2,31 @@
 * Copyright (c) wangbo@joycode.art 2024
 */
 
-#ifndef INPUT_TRAITS_H
-#define INPUT_TRAITS_H
+#ifndef INPUT_TYPE_TRAITS_H
+#define INPUT_TYPE_TRAITS_H
+
+#include "matmul_type_def.h"
 
 namespace matmul {
 
-enum class InputTag {
-    LEFT,
-    RIGHT,
+enum class InputTypeTag {
+    A, B
 };
 
-template<const auto& MM_CFG, InputTag TAG>
-class InputTraits {
+template <typename INPUT_TYPE, typename INNER_TYPE = typename INPUT_TYPE::T>
+struct MatmulInputTypeA : INPUT_TYPE {
+    using INNER_T = INNER_TYPE;
+    constexpr static InputTypeTag TAG = InputTypeTag::A;
+};
+
+template <typename INPUT_TYPE, typename INNER_TYPE = typename INPUT_TYPE::T>
+struct MatmulInputTypeB : INPUT_TYPE {
+    using INNER_T = INNER_TYPE;
+    constexpr static InputTypeTag TAG = InputTypeTag::B;
+};
+
+template<typename INPUT_TYPE, const auto& MM_CFG>
+class InputTypeTraits {
 public:
     static constexpr uint32_t GetRowSize();
     static constexpr uint32_t GetBasicRowSize();
@@ -22,8 +35,8 @@ public:
     static constexpr uint32_t GetBlockSize();
 };
 
-template<const auto& MM_CFG>
-class InputTraits<MM_CFG, InputTag::LEFT> {
+template<typename INPUT_TYPE, typename INNER_TYPE, const auto& MM_CFG>
+class InputTypeTraits<MatmulInputTypeA<INPUT_TYPE, INNER_TYPE>, MM_CFG> {
 public:
     static constexpr uint32_t GetRowSize() {
         return MM_CFG.singleCoreK;
@@ -43,8 +56,8 @@ public:
     }
 };
 
-template<const auto& MM_CFG>
-class InputTraits<MM_CFG, InputTag::RIGHT> {
+template<typename INPUT_TYPE, typename INNER_TYPE, const auto& MM_CFG>
+class InputTypeTraits<MatmulInputTypeB<INPUT_TYPE, INNER_TYPE>, MM_CFG> {
 public:
     static constexpr uint32_t GetRowSize() {
         return MM_CFG.singleCoreN;

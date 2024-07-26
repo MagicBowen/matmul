@@ -43,8 +43,8 @@ public:
     MATMUL_ALLOW_USING(CopyInBufferB);
     MATMUL_ALLOW_USING(MMad);
 
-    template<InputTag TAG>
-    using CopyInBuffer = std::conditional_t<TAG == InputTag::LEFT, CopyInBufferA, CopyInBufferB>;
+    template<InputTypeTag TAG>
+    using CopyInBuffer = std::conditional_t<TAG == InputTypeTag::A, CopyInBufferA, CopyInBufferB>;
 
 public:
     MATMUL_DFX_PROXY_REGISTER_DEFAULT();
