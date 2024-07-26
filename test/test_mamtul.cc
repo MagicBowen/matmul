@@ -9,8 +9,12 @@ using C_TYPE = matmul::MatmulType<TPosition::GM, CubeFormat::ND, float>;
 using BIAS_TYPE = matmul::MatmulType<TPosition::GM, CubeFormat::ND, float>;
 
 SCENARIO("Sample Test") {
+    MatmulDfxStatisticHandler::Clear();
+
     MatmulImpl<A_TYPE, B_TYPE, C_TYPE, BIAS_TYPE> mm;
     mm.SetTensorA(GlobalTensor<A_TYPE::T>{});
     mm.IterateAll(LocalTensor<float>{});
     REQUIRE(!mm.Iterate());
+
+    MatmulDfxStatisticHandler::PrintStatistic();
 }

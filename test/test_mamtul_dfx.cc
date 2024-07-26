@@ -69,6 +69,7 @@ SCENARIO("object dfx const proxy Test") {
 
 //////////////////////////////////////////////////////////////
 SCENARIO("object dfx proxy not match test") {
+
     OtherObject obj;
     MatmulDfxProxy<OtherObject> proxy{obj};
 
