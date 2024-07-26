@@ -26,9 +26,9 @@ struct MatmulDfxStatisticHandler {
 
     static void PrintStatistic() {
         std::cout << "------------------------------------------------" << std::endl;
-        std::cout << "【DFX FUNCTION STATISTIC】: " << std::endl;
+        std::cout << "【DFX FUNCTION STATISTIC】 " << std::endl;
         for (const auto& [func, count] : funcCallCounts_) {
-            std::cout << "【" << func << "】: " << count << std::endl;
+            std::cout << " - " << func << " : " << count << std::endl;
         }
         std::cout << "------------------------------------------------" << std::endl;
     }

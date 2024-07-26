@@ -50,8 +50,10 @@ public:
     MATMUL_DFX_PROXY_REGISTER_DEFAULT();
     MATMUL_DFX_PROXY_REGISTER(MMad, Compute);
     MATMUL_DFX_PROXY_REGISTER(Scheduler, Schedule);
-    MATMUL_DFX_PROXY_REGISTER(CopyCubeInA, SetAddr, Copy);
-    MATMUL_DFX_PROXY_REGISTER(CopyInBufferA, Init, AllocTensor);
+    MATMUL_DFX_PROXY_REGISTER(CopyCubeInA, Init, Destroy, SetAddr, Load, Clear);
+    MATMUL_DFX_PROXY_REGISTER(CopyCubeInB, Init, Destroy, SetAddr, Load, Clear);
+    MATMUL_DFX_PROXY_REGISTER(CopyInBufferA, Init, Destroy, AllocTensor, FreeTensor, GetTensor);
+    // MATMUL_DFX_PROXY_REGISTER(CopyInBufferB, Init, Destroy, AllocTensor, FreeTensor, GetTensor);
 
 private:
     using IMPL = MATMUL_IMPL_TYPE;
@@ -61,13 +63,14 @@ private:
 
 public:
     void Init(const TCubeTiling* tiling) {
-        var.tiling = tiling;
-        var.singleCoreM_ = MM_CFG.singleCoreM;
-        var.singleCoreN_ = MM_CFG.singleCoreN;
-        var.singleCoreK_ = MM_CFG.singleCoreK;
-        var.mIter = MM_CFG.singleCoreM / MM_CFG.basicM;
-        var.nIter = MM_CFG.singleCoreN / MM_CFG.basicN;
-        var.kIter = MM_CFG.singleCoreK / MM_CFG.basicK;
+        InitVar(tiling);
+        MATMUL_MODULE(CopyCubeInA)->Init();
+        MATMUL_MODULE(CopyCubeInB)->Init();
+    }
+
+    void End() {
+        MATMUL_MODULE(CopyCubeInA)->Destroy();
+        MATMUL_MODULE(CopyCubeInB)->Destroy();
     }
 
     void SetTensorA(const GlobalTensor<SrcAT>& leftMatrix) {
@@ -99,15 +102,27 @@ public:
     }
 
     bool Iterate() {
-        return false;
+        return true;
     }
 
-    void IterateAll(const GlobalTensor<DstT>&) {
+    void IterateAll(GlobalTensor<DstT>&) {
     }
 
-    void IterateAll(const LocalTensor<DstT>&) {
-        MATMUL_MODULE(Scheduler)->Schedule();
+    void IterateAll(LocalTensor<DstT>& tensor) {
+        while(MATMUL_MODULE(Scheduler)->Schedule(tensor)) {
+        }
     }
+
+private:
+    void InitVar(const TCubeTiling* tiling) {
+        var.tiling = tiling;
+        var.singleCoreM_ = MM_CFG.singleCoreM;
+        var.singleCoreN_ = MM_CFG.singleCoreN;
+        var.singleCoreK_ = MM_CFG.singleCoreK;
+        var.mIter = MM_CFG.singleCoreM / MM_CFG.basicM;
+        var.nIter = MM_CFG.singleCoreN / MM_CFG.basicN;
+        var.kIter = MM_CFG.singleCoreK / MM_CFG.basicK;
+    }    
 
 private:
     MatmulParams var;

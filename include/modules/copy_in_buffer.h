@@ -5,8 +5,8 @@
 #ifndef COPY_IN_BUFFER_H
 #define COPY_IN_BUFFER_H
 
-#include "matmul_tensor.h"
 #include "modules/input_type_traits.h"
+#include "matmul_tensor.h"
 
 namespace matmul {
 
@@ -17,27 +17,30 @@ class CopyInBuffer {
     static constexpr uint32_t BLOCK_SIZE = InputTypeTraits<INPUT_TYPE, MM_CFG>::GetBlockSize();
 
 public:
-    void Init() {
-        Clear();
+    void Init(uint32_t blockNum, uint32_t capacity) {
+        this->blockNum = blockNum;
+        this->capacity = capacity;
     }
 
-    LocalTensor<SrcT> AllocTensor() {
+    void Destroy() {
+    }
+
+    LocalTensor<SrcT> AllocTensor(uint32_t row, uint32_t col) {
         LocalTensor<SrcT> tensor;
-        tensor.SetAddr(addr, BLOCK_SIZE);
         return tensor;
     }
 
-    void FreeTensor(LocalTensor<SrcT>&) {
-        Clear();
+    void FreeTensor(LocalTensor<SrcT>& tensor) {
+    }
+
+    LocalTensor<SrcT> GetTensor() {
+        LocalTensor<SrcT> tensor;
+        return tensor;
     }
 
 private:
-    void Clear() {
-        memset(addr, 0, sizeof(SrcT) * BLOCK_SIZE);
-    }
-
-private:
-    SrcT* addr[BLOCK_SIZE];
+    uint32_t blockNum{0};
+    uint32_t capacity{0};
 };
 
 }

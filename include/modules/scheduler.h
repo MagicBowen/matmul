@@ -14,18 +14,28 @@ namespace matmul {
 template<typename IMPL, const auto& MM_CFG>
 class Scheduler {
     MATMUL_USE_MODULE(IterateController);
+    MATMUL_USE_MODULE(CopyCubeInA);
+    MATMUL_USE_MODULE(CopyCubeInB);
     MATMUL_USE_MODULE(MMad);
 
 public:
-    bool Schedule() {
+    template<typename C_TYPE>
+    bool Schedule(LocalTensor<C_TYPE>& c) {
         if (MATMUL_MODULE(IterateController)->MoveNext()) {
             return false;
         }
-        LocalTensor<float> dstTensor;
-        LocalTensor<half> lhs;
-        LocalTensor<half> rhs;
 
-        MATMUL_MODULE(MMad)->Compute(dstTensor, lhs, rhs, 0, 0);
+        auto row = MATMUL_MODULE(IterateController)->GetRowIndex();
+        auto col = MATMUL_MODULE(IterateController)->GetColIndex();
+
+        auto a = MATMUL_MODULE(CopyCubeInA)->Load(row, col, 1, 1);
+        auto b = MATMUL_MODULE(CopyCubeInB)->Load(row, col, 1, 1);
+
+        MATMUL_MODULE(MMad)->Compute(c, a, b, 0, 0);
+
+        MATMUL_MODULE(CopyCubeInA)->Clear(a);
+        MATMUL_MODULE(CopyCubeInB)->Clear(b);
+
         return true;
     }
 };
