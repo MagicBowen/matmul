@@ -50,6 +50,12 @@ public:
     MATMUL_DFX_PROXY_REGISTER_DEFAULT();
     MATMUL_DFX_PROXY_REGISTER(MMad, Compute);
 
+private:
+    using IMPL = MATMUL_IMPL_TYPE;
+    MATMUL_USE_MODULE(CopyCubeInA);
+    MATMUL_USE_MODULE(CopyCubeInB);
+    MATMUL_USE_MODULE(Scheduler);
+
 public:
     void Init(const TCubeTiling* tiling) {
         var.tiling = tiling;
@@ -62,19 +68,19 @@ public:
     }
 
     void SetTensorA(const GlobalTensor<SrcAT>& leftMatrix) {
-        CopyCubeInA::SetAddr(leftMatrix);
+        MATMUL_MODULE(CopyCubeInA)->SetAddr(leftMatrix);
     }
 
     void SetTensorA(const LocalTensor<SrcAT>& leftMatrix) {
-        CopyCubeInA::SetAddr(leftMatrix);
+        MATMUL_MODULE(CopyCubeInA)->SetAddr(leftMatrix);
     }
 
     void SetTensorB(const GlobalTensor<SrcBT>& rightMatrix) {
-        CopyCubeInB::SetAddr(rightMatrix);
+        MATMUL_MODULE(CopyCubeInB)->SetAddr(rightMatrix);
     }
 
     void SetTensorB(const LocalTensor<SrcBT>& rightMatrix) {
-        CopyCubeInB::SetAddr(rightMatrix);
+        MATMUL_MODULE(CopyCubeInB)->SetAddr(rightMatrix);
     }
 
     void SetBias(const GlobalTensor<BiasT>& bias) {
@@ -94,11 +100,10 @@ public:
     }
 
     void IterateAll(const GlobalTensor<DstT>&) {
-
     }
 
     void IterateAll(const LocalTensor<DstT>&) {
-        Scheduler::Schedule();
+        MATMUL_MODULE(Scheduler)->Schedule();
     }
 
 private:
