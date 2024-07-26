@@ -49,6 +49,9 @@ public:
 public:
     MATMUL_DFX_PROXY_REGISTER_DEFAULT();
     MATMUL_DFX_PROXY_REGISTER(MMad, Compute);
+    MATMUL_DFX_PROXY_REGISTER(Scheduler, Schedule);
+    MATMUL_DFX_PROXY_REGISTER(CopyCubeInA, SetAddr, Copy);
+    MATMUL_DFX_PROXY_REGISTER(CopyInBufferA, Init, AllocTensor);
 
 private:
     using IMPL = MATMUL_IMPL_TYPE;

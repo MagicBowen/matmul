@@ -49,7 +49,7 @@ struct GlobalTensor {
         return this->addr;
     }
 
-    T* GetLength() const {
+    uint32_t GetLength() const {
         return length;
     }
 

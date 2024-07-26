@@ -25,7 +25,7 @@ decltype((MODULE().MODULE::FUNC)(std::forward<Args>(args)...))>,            \
 decltype((MODULE().MODULE::FUNC)(std::forward<Args>(args)...))>{            \
     ModuleDFXHandler::PreCall(#MODULE, #FUNC, std::forward<Args>(args)...); \
     auto ret = (M_.MODULE::FUNC)(std::forward<Args>(args)...);              \
-    ModuleDFXHandler::PostCall();                                           \
+    ModuleDFXHandler::PostCall(#MODULE, #FUNC, ret);                        \
     return ret;                                                             \
 }                                                                           \
 template <typename... Args>                                                 \
@@ -33,7 +33,7 @@ auto FUNC(Args&&... args) -> std::enable_if_t<std::is_void_v<               \
 decltype((MODULE().MODULE::FUNC)(std::forward<Args>(args)...))>> {          \
     ModuleDFXHandler::PreCall(#MODULE, #FUNC, std::forward<Args>(args)...); \
     (M_.MODULE::FUNC)(std::forward<Args>(args)...);                         \
-    ModuleDFXHandler::PostCall();                                           \
+    ModuleDFXHandler::PostCall(#MODULE, #FUNC);                             \
 }   
 
 ///////////////////////////////////////////////////////////////////////////////
