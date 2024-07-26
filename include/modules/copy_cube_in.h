@@ -25,7 +25,7 @@ class CopyCubeIn {
 public:
     void SetAddr(const GlobalTensor<typename TYPE::T>& input) {
         addr = input.GetAddr();
-        MATMUL_MODULE(CopyInBuffer).Init();
+        MATMUL_MODULE(CopyInBuffer)->Init();
     }
 
     void Copy(LocalTensor<typename TYPE::T>& tensor, uint32_t row, uint32_t col, uint32_t height, uint32_t width) {

@@ -11,6 +11,7 @@
 #include "matmul_config.h"
 #include "matmul_call_back.h"
 #include "matmul_policy.h"
+#include "dfx/matmul_dfx_proxy.h"
 
 namespace matmul {
 
@@ -45,15 +46,12 @@ public:
     template<InputTag TAG>
     using CopyInBuffer = std::conditional_t<TAG == InputTag::LEFT, CopyInBufferA, CopyInBufferB>;
 
-    // template<typename TYPE, InputTag TAG>
-    // MATMUL_ALLOW_USING_TEMPLATE(CopyInBuffer, TYPE, TAG);
+public:
+    template <typename T>
+    struct MatmulDfxProxy : T {
+    };
 
-    // template<typename IMPL, typename INPUT_TYPE, const auto& MM_CFG_, InputTag TAG>
-    // friend class matmul::CopyInBuffer;
-
-    // template<typename TYPE, InputTag TAG>
-    // friend class MATMUL_POLICY<MatmulImpl<A_TYPE, B_TYPE, C_TYPE, BIAS_TYPE, MM_CFG, MM_CB, MATMUL_POLICY>, A_TYPE, B_TYPE, C_TYPE, BIAS_TYPE, MM_CFG, MM_CB>::CopyInBuffer;
-
+    MATMUL_DFX_PROXY_REGISTER(MMad, Compute);
 
 public:
     void Init(const TCubeTiling* tiling) {

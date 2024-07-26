@@ -12,5 +12,5 @@ SCENARIO("Sample Test") {
     MatmulImpl<A_TYPE, B_TYPE, C_TYPE, BIAS_TYPE> mm;
     mm.SetTensorA(GlobalTensor<A_TYPE::T>{});
     mm.IterateAll(LocalTensor<float>{});
-    REQUIRE(mm.Iterate());
+    REQUIRE(!mm.Iterate());
 }

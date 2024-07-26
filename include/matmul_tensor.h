@@ -6,6 +6,7 @@
 #define MATMUL_TENSOR_H
 
 #include <stdint.h>
+#include <iostream>
 
 namespace  {
 
@@ -56,6 +57,18 @@ private:
     T* addr;
     uint32_t length;
 };
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const LocalTensor<T>& tensor) {
+    os << "LocalTensor(" << tensor.GetAddr() << " : " << tensor.GetLength() << ")";
+    return os;
+}
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const GlobalTensor<T>& tensor) {
+    os << "LocalTensor(" << tensor.GetAddr() << " : " << tensor.GetLength() << ")";
+    return os;
+}
 
 }
 

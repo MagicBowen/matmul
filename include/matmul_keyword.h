@@ -13,8 +13,8 @@
 #define MATMUL_CAST_TO_IMPL()                                   \
 static_cast<MATMUL_IMPL_*>(this)
 
-#define MATMUL_CAST_TO(...)                                    \
-(*(static_cast<typename MATMUL_IMPL_::__VA_ARGS__*>(MATMUL_CAST_TO_IMPL())))
+#define MATMUL_CAST_TO(...)                                     \
+(static_cast<typename MATMUL_IMPL_::__VA_ARGS__*>(MATMUL_CAST_TO_IMPL()))
 
 #define MATMUL_MODULE(NAME)      cast_to_##NAME()
 
@@ -23,7 +23,14 @@ inline constexpr auto MATMUL_MODULE(NAME) -> decltype(auto) {   \
     return MATMUL_CAST_TO(NAME);                                \
 }
 
-#define MATMUL_USE_MODULE_ON(NAME, ...)                   \
+#define MATMUL_USE_DFX_MODULE(NAME)                             \
+inline constexpr auto MATMUL_MODULE(NAME) -> decltype(auto) {   \
+    auto self = MATMUL_CAST_TO(NAME);                           \
+    typename MATMUL_IMPL_::template MatmulDfxProxy<typename IMPL::NAME> proxy{*self};   \
+    return proxy;                                               \
+}
+
+#define MATMUL_USE_MODULE_ON(NAME, ...)                         \
 inline constexpr auto MATMUL_MODULE(NAME) -> decltype(auto) {   \
     return MATMUL_CAST_TO(template NAME<__VA_ARGS__>);          \
 }
