@@ -1,7 +1,6 @@
 #include "catch2/catch.hpp"
-#include <iostream>
 #include "dfx/matmul_dfx_proxy.h"
-#include "dfx/matmul_dfx_handler.h"
+#include <type_traits>
 
 using namespace matmul;
 
@@ -31,17 +30,29 @@ struct Object {
 
     void other_func() {        
     }
+
+    const char* hello() const {
+        return "hello";
+    }
 };
 
-MATMUL_DFX_PROXY_REGISTER(Object, func);
-// MATMUL_DFX_PROXY_REGISTER(Object, other_func);
+struct OtherObject {
+    int func() const {
+        return 5;
+    }
+};
 
+//////////////////////////////////////////////////////////////
+MATMUL_DFX_PROXY_REGISTER_DEFAULT();
+MATMUL_DFX_PROXY_REGISTER(Object, func, other_func);
+
+//////////////////////////////////////////////////////////////
 SCENARIO("object dfx proxy Test") {
     Object obj;
-    MatmulDfxProxy<decltype(obj)> proxy{obj};
+    MatmulDfxProxy<Object> proxy{obj};
 
     proxy->func();
-    // proxy->other_func();
+    proxy->other_func();
     REQUIRE(proxy->func(1));
     REQUIRE(!proxy->func(2.0));
     REQUIRE(!proxy->func("hello"));
@@ -49,10 +60,17 @@ SCENARIO("object dfx proxy Test") {
 
 SCENARIO("object dfx const proxy Test") {
     const Object obj;
-    auto& ob = obj;
-    MatmulDfxProxy<std::remove_reference_t<decltype(ob)>> proxy{ob};
+    MatmulDfxProxy<const Object> proxy{obj};
 
+    proxy->func("hello", 3);
     REQUIRE(proxy->func(2.1));
     REQUIRE(!proxy->func("hello"));
-    proxy->func("hello", 3);
+}
+
+//////////////////////////////////////////////////////////////
+SCENARIO("object dfx proxy not match test") {
+    OtherObject obj;
+    MatmulDfxProxy<OtherObject> proxy{obj};
+
+    REQUIRE(proxy->func() == 5);
 }

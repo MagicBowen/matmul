@@ -47,10 +47,7 @@ public:
     using CopyInBuffer = std::conditional_t<TAG == InputTag::LEFT, CopyInBufferA, CopyInBufferB>;
 
 public:
-    template <typename T>
-    struct MatmulDfxProxy : T {
-    };
-
+    MATMUL_DFX_PROXY_REGISTER_DEFAULT();
     MATMUL_DFX_PROXY_REGISTER(MMad, Compute);
 
 public:

@@ -8,7 +8,6 @@
 #include "matmul_keyword.h"
 #include "modules/iterate_controller.h"
 #include "modules/mmad.h"
-#include "dfx/matmul_dfx_register.h"
 
 namespace matmul {
 
