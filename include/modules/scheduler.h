@@ -15,7 +15,7 @@ namespace matmul {
 template<typename IMPL, const auto& MM_CFG>
 class Scheduler {
     MATMUL_USE_MODULE(IterateController);
-    MATMUL_USE_DFX_MODULE(MMad);
+    MATMUL_USE_MODULE(MMad);
 
 public:
     bool Schedule() {
