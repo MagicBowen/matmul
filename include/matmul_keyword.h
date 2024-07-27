@@ -14,29 +14,52 @@
 #define MATMUL_CAST_TO_IMPL()                                   \
 static_cast<MATMUL_IMPL__*>(this)
 
+#define MATMUL_CAST_TO_CONST_IMPL()                             \
+static_cast<const MATMUL_IMPL__*>(this)
+
 #define MATMUL_CAST_TO_IMPL_OF(...)                             \
 (static_cast<typename MATMUL_IMPL__::__VA_ARGS__*>(MATMUL_CAST_TO_IMPL()))
+
+#define MATMUL_CAST_TO_CONST_IMPL_OF(...)                       \
+(static_cast<const typename MATMUL_IMPL__::__VA_ARGS__*>(MATMUL_CAST_TO_CONST_IMPL()))
 
 #define MATMUL_CAST_TO_PROXY_OF(NAME)                           \
 typename MATMUL_IMPL__::template MatmulDfxProxy<typename IMPL::NAME> {*MATMUL_CAST_TO_IMPL_OF(NAME)}; 
 
+#define MATMUL_CAST_TO_CONST_PROXY_OF(NAME)                     \
+typename MATMUL_IMPL__::template MatmulDfxProxy<const typename IMPL::NAME> {*MATMUL_CAST_TO_CONST_IMPL_OF(NAME)}; 
+
 #define MATMUL_MODULE(NAME)      cast_to_##NAME()
 
 #define MATMUL_USE_MODULE(NAME)                                 \
-inline constexpr auto MATMUL_MODULE(NAME) -> decltype(auto) {   \
+inline constexpr auto MATMUL_MODULE(NAME) {                     \
     if constexpr (MatmulDfxCfg::ENABLE) {                       \
         return MATMUL_CAST_TO_PROXY_OF(NAME);                   \
     } else {                                                    \
         return MATMUL_CAST_TO_IMPL_OF(NAME);                    \
     }                                                           \
+}                                                               \
+inline constexpr auto MATMUL_MODULE(NAME) const {               \
+    if constexpr (MatmulDfxCfg::ENABLE) {                       \
+        return MATMUL_CAST_TO_CONST_PROXY_OF(NAME);             \
+    } else {                                                    \
+        return MATMUL_CAST_TO_CONST_IMPL_OF(NAME);              \
+    }                                                           \
 }
 
 #define MATMUL_USE_MODULE_ON(NAME, ...)                         \
-inline constexpr auto MATMUL_MODULE(NAME) -> decltype(auto) {   \
+inline constexpr auto MATMUL_MODULE(NAME) {                     \
     if constexpr (MatmulDfxCfg::ENABLE) {                       \
         return MATMUL_CAST_TO_PROXY_OF(template NAME<__VA_ARGS__>);\
     } else {                                                    \
         return MATMUL_CAST_TO_IMPL_OF(template NAME<__VA_ARGS__>); \
+    }                                                           \
+}                                                               \
+inline constexpr auto MATMUL_MODULE(NAME) const {               \
+    if constexpr (MatmulDfxCfg::ENABLE) {                       \
+        return MATMUL_CAST_TO_CONST_PROXY_OF(template NAME<__VA_ARGS__>);\
+    } else {                                                    \
+        return MATMUL_CAST_TO_CONST_IMPL_OF(template NAME<__VA_ARGS__>); \
     }                                                           \
 }
 

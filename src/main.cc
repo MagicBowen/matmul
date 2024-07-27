@@ -1,90 +1,88 @@
 #include <iostream>
+#include <tuple>
+#include <utility>
+#include <stdexcept>
 #include <type_traits>
-#include <functional>
-#include <unordered_map>
 
-// Primary template for FuncProxy, which does nothing
-template <typename, auto>
-struct FuncProxy {};
+// Helper template to check if a type is invocable with specific arguments
+template <typename T, typename F, typename Tuple, std::size_t... I>
+auto is_invocable_impl(T* obj, F func, Tuple&& t, std::index_sequence<I...>) 
+    -> decltype((obj->*func)(std::get<I>(std::forward<Tuple>(t))...), std::true_type{}) {
+    return std::true_type{};
+}
 
-// Specialization for registered functions
-template <typename T, typename R, typename... Args, R (T::*Func)(Args...)>
-struct FuncProxy<T, Func> {
-    FuncProxy(T& module) : module_(module) {}
+template <typename T, typename F, typename Tuple, std::size_t... I>
+std::false_type is_invocable_impl(...) {
+    return std::false_type{};
+}
 
-    R operator()(Args... args) {
-        return (module_.*Func)(args...);
-    }
+template <typename T, typename F, typename Tuple>
+constexpr auto is_invocable(T* obj, F func, Tuple&& t) {
+    constexpr auto N = std::tuple_size_v<std::remove_reference_t<Tuple>>;
+    return is_invocable_impl<T, F, Tuple>(obj, func, std::forward<Tuple>(t), std::make_index_sequence<N>{});
+}
 
-private:
-    T& module_;
-};
+template <typename T, typename F, typename Tuple, std::size_t... I>
+auto call_if_match_impl(T* obj, F func, Tuple&& t, std::index_sequence<I...>) 
+    -> decltype((obj->*func)(std::get<I>(std::forward<Tuple>(t))...)) {
+    return (obj->*func)(std::get<I>(std::forward<Tuple>(t))...);
+}
 
-// Primary template for MatmulDfxProxy
-template <typename T>
-class MatmulDfxProxy {
-public:
-    MatmulDfxProxy(T& module) : module_(module) {}
+template <typename T, typename F, typename Tuple>
+auto call_if_match(T* obj, F func, Tuple&& t) {
+    constexpr auto N = std::tuple_size_v<std::remove_reference_t<Tuple>>;
+    return call_if_match_impl(obj, func, std::forward<Tuple>(t), std::make_index_sequence<N>{});
+}
 
-    template <auto Func, typename... Args>
-    auto invoke(Args&&... args) {
-        if constexpr (std::is_member_function_pointer_v<decltype(Func)>) {
-            FuncProxy<T, Func> funcProxy(module_);
-            return funcProxy(std::forward<Args>(args)...);
-        } else {
-            return (module_.*Func)(std::forward<Args>(args)...);
+// Helper template to iterate over a tuple of member function pointers and attempt to call the matching one
+template <typename T, typename Tuple, typename ArgsTuple, std::size_t... I>
+void match_and_call(T* obj, Tuple&& funcs, ArgsTuple&& args, std::index_sequence<I...>) {
+    bool called = false;
+    auto try_call = [&](auto func) {
+        if (!called) {
+            if constexpr (decltype(is_invocable(obj, func, std::forward<ArgsTuple>(args)))::value) {
+                call_if_match(obj, func, std::forward<ArgsTuple>(args));
+                called = true;
+            }
         }
+    };
+
+    (try_call(std::get<I>(funcs)), ...);
+    if (!called) {
+        throw std::runtime_error("No matching function found");
+    }
+}
+
+// Main template to be used in calling the appropriate member function
+template <typename T, typename... Funcs, typename... Args>
+void call_matching_function(T* obj, const std::tuple<Funcs...>& funcs, Args&&... args) {
+    match_and_call(obj, funcs, std::forward_as_tuple(args...), std::index_sequence_for<Funcs...>{});
+}
+
+// Example class
+class MyClass {
+public:
+    void method1(int a) {
+        std::cout << "Method1 called with " << a << std::endl;
     }
 
-    T* operator->() {
-        return &module_;
+    void method2(int a, double b) {
+        std::cout << "Method2 called with " << a << " and " << b << std::endl;
     }
 
-private:
-    T& module_;
-};
-
-// Macro to register functions
-#define MATMUL_DFX_PROXY_REGISTER(MODULE, FUNC) \
-template <> \
-class MatmulDfxProxy<MODULE> { \
-public: \
-    MatmulDfxProxy(MODULE& module) : module_(module) {} \
-    template <auto Func, typename... Args> \
-    auto invoke(Args&&... args) { \
-        FuncProxy<MODULE, &MODULE::FUNC> funcProxy(module_); \
-        return funcProxy(std::forward<Args>(args)...); \
-    } \
-    MODULE* operator->() { \
-        return &module_; \
-    } \
-private: \
-    MODULE& module_; \
-};
-
-// Define a class
-struct Object {
-    bool func(int value) {
-        std::cout << "func called with value: " << value << std::endl;
-        return true;
-    }
-
-    void other_func() {
-        std::cout << "other_func called" << std::endl;
+    void method3(const std::string& str) {
+        std::cout << "Method3 called with " << str << std::endl;
     }
 };
 
-// Register Object::func to proxy
-MATMUL_DFX_PROXY_REGISTER(Object, func)
-
+// Example usage
 int main() {
-    Object obj;
-    MatmulDfxProxy<Object> proxy{obj};
+    MyClass obj;
+    auto methods = std::make_tuple(&MyClass::method1, &MyClass::method2, &MyClass::method3);
 
-    // Use proxy func via invoke
-    proxy.invoke<&Object::func>(42);
-    // Use other func directly via original object
-    proxy->other_func();
+    call_matching_function(&obj, methods, 42);               // Calls method1
+    call_matching_function(&obj, methods, 42, 3.14);         // Calls method2
+    call_matching_function(&obj, methods, std::string("Hello")); // Calls method3
 
     return 0;
 }
