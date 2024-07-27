@@ -34,7 +34,7 @@ class MatmulImpl
     using DstT = typename C_TYPE::T;
     using BiasT = typename BIAS_TYPE::T;
 
-public:
+private:
     MATMUL_ALLOW_USING(Scheduler);
     MATMUL_ALLOW_USING(IterateController);
     MATMUL_ALLOW_USING(CopyCubeInA);
@@ -46,7 +46,7 @@ public:
     template<InputTypeTag TAG>
     using CopyInBuffer = std::conditional_t<TAG == InputTypeTag::A, CopyInBufferA, CopyInBufferB>;
 
-public:
+private:
     MATMUL_DFX_PROXY_REGISTER_DEFAULT();
     MATMUL_DFX_PROXY_REGISTER(MMad, Compute);
     MATMUL_DFX_PROXY_REGISTER(Scheduler, Schedule);
