@@ -31,7 +31,7 @@ public:
         auto a = MATMUL_MODULE(CopyCubeInA)->Load(row, col, 1, 1);
         auto b = MATMUL_MODULE(CopyCubeInB)->Load(row, col, 1, 1);
 
-        MATMUL_MODULE(MMad)->Compute(c, a, b, 0, 0);
+        MATMUL_MODULE(MMad)->Compute(c, a, b);
 
         MATMUL_MODULE(CopyCubeInA)->Clear(a);
         MATMUL_MODULE(CopyCubeInB)->Clear(b);

@@ -53,7 +53,7 @@ private:
     MATMUL_DFX_PROXY_REGISTER(CopyCubeInA, Init, Destroy, SetAddr, Load, Clear);
     MATMUL_DFX_PROXY_REGISTER(CopyCubeInB, Init, Destroy, SetAddr, Load, Clear);
     MATMUL_DFX_PROXY_REGISTER(CopyInBufferA, Init, Destroy, AllocTensor, FreeTensor, GetTensor);
-    // MATMUL_DFX_PROXY_REGISTER(CopyInBufferB, Init, Destroy, AllocTensor, FreeTensor, GetTensor);
+    MATMUL_DFX_PROXY_REGISTER(CopyInBufferB, Init, Destroy, AllocTensor, FreeTensor, GetTensor);
 
 private:
     using IMPL = MATMUL_IMPL_TYPE;
