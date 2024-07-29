@@ -119,9 +119,9 @@ private:
         var.singleCoreM_ = MM_CFG.singleCoreM;
         var.singleCoreN_ = MM_CFG.singleCoreN;
         var.singleCoreK_ = MM_CFG.singleCoreK;
-        var.mIter = MM_CFG.singleCoreM / MM_CFG.basicM;
-        var.nIter = MM_CFG.singleCoreN / MM_CFG.basicN;
-        var.kIter = MM_CFG.singleCoreK / MM_CFG.basicK;
+        var.mIter_ = MM_CFG.singleCoreM / MM_CFG.basicM;
+        var.nIter_ = MM_CFG.singleCoreN / MM_CFG.basicN;
+        var.kIter_ = MM_CFG.singleCoreK / MM_CFG.basicK;
     }    
 
 private:

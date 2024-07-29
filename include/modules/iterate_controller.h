@@ -15,9 +15,9 @@ public:
     bool MoveNext() {
         if (IsFinished()) return false;
 
-        if (++curN >= MATMUL_CONST_PARAM_VAR.nIter) {
-            curN = 0;
-            if (++curM >= MATMUL_CONST_PARAM_VAR.mIter) {
+        if (++curN_ >= MATMUL_CONST_PARAM_VAR.nIter_) {
+            curN_ = 0;
+            if (++curM_ >= MATMUL_CONST_PARAM_VAR.mIter_) {
                 return false;
             }
         }
@@ -25,21 +25,27 @@ public:
     }
 
     uint32_t GetRowIndex() const {
-        return curM;
+        return curM_;
     }
 
     uint32_t GetColIndex() const {
-        return curN;
+        return curN_;
     }
 
 private:
     bool IsFinished() const {
-        return curM >= MATMUL_CONST_PARAM_VAR.mIter;
+        return curM_ >= MATMUL_CONST_PARAM_VAR.mIter_;
     }
 
 private:
-    uint32_t curM{0};
-    uint32_t curN{0};
+    uint32_t curM_{0};
+    uint32_t curN_{0};
+    
+    uint32_t curStepM_;
+    uint32_t curStepN_;
+    
+    uint32_t stepMIdx_;
+    uint32_t stepNIdx_;
 };
 
 }
