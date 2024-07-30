@@ -60,9 +60,9 @@ public:
     template <typename TENSOR>
     void Schedule(TENSOR& tensor) {
         while (ScheduleOnce()) {
-            auto srcTensor = MATMUL_MODULE(Co1Buffer)->Get();
-            MATMUL_MODULE(CopyCubeOut)->Copy(tensor, srcTensor);
-            MATMUL_MODULE(Co1Buffer)->Free(srcTensor);
+            auto l0cTensor = MATMUL_MODULE(Co1Buffer)->Get();
+            MATMUL_MODULE(CopyCubeOut)->Copy(tensor, l0cTensor);
+            MATMUL_MODULE(Co1Buffer)->Free(l0cTensor);
         }
     }
 };
