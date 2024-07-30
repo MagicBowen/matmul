@@ -9,6 +9,7 @@
 #include <type_traits>
 #include "dfx/matmul_dfx_cfg.h"
 
+/////////////////////////////////////////////////////////////////
 #define MATMUL_IMPL__ IMPL
 
 #define MATMUL_CAST_TO_IMPL()                                   \
@@ -29,6 +30,7 @@ typename MATMUL_IMPL__::template MatmulDfxProxy<typename IMPL::NAME> {*MATMUL_CA
 #define MATMUL_CAST_TO_CONST_PROXY_OF(NAME)                     \
 typename MATMUL_IMPL__::template MatmulDfxProxy<const typename IMPL::NAME> {*MATMUL_CAST_TO_CONST_IMPL_OF(NAME)}; 
 
+/////////////////////////////////////////////////////////////////
 #define MATMUL_MODULE(NAME)      cast_to_##NAME()
 
 #define MATMUL_USE_MODULE(NAME)                                 \
@@ -63,6 +65,7 @@ inline constexpr auto MATMUL_MODULE(NAME) const {               \
     }                                                           \
 }
 
+/////////////////////////////////////////////////////////////////
 #define MATMUL_POLICY_TEMPLATE     MATMUL_POLICY
 
 #define MATMUL_POLICY_TEMPLATE_DEFAULT_OF(DEFAULT)              \
@@ -81,6 +84,15 @@ MATMUL_POLICY_TEMPLATE<MATMUL_IMPL_TYPE, A_TYPE, B_TYPE, C_TYPE, BIAS_TYPE, MM_C
 
 #define MATMUL_IMPORT_MODULE(...)  private MATMUL_MODULE_IN_POLICY(__VA_ARGS__)
 
+/////////////////////////////////////////////////////////////////
+#define MATMUL_PRIVATE_TEMPLATE    MatmulPrivateModules
+
+#define MATMUL_MODULE_IN_PRIVATE(...)                          \
+MATMUL_PRIVATE_TEMPLATE<MATMUL_IMPL_TYPE, A_TYPE, B_TYPE, C_TYPE, BIAS_TYPE, MM_CFG>::__VA_ARGS__
+
+#define MATMUL_IMPORT_MODULE_PRIVATE(...)  private MATMUL_MODULE_IN_PRIVATE(__VA_ARGS__)
+
+/////////////////////////////////////////////////////////////////
 #define MATMUL_ALLOW_USING(NAME)                                \
 friend typename MATMUL_MODULE_IN_POLICY(NAME);                  \
 using NAME = typename MATMUL_MODULE_IN_POLICY(NAME)
@@ -88,6 +100,15 @@ using NAME = typename MATMUL_MODULE_IN_POLICY(NAME)
 #define MATMUL_ALLOW_USING_TEMPLATE(NAME, ...)                  \
 using NAME = typename MATMUL_MODULE_IN_POLICY(template NAME<__VA_ARGS__>)
 
+/////////////////////////////////////////////////////////////////
+#define MATMUL_ALLOW_USING_PRIVATE(NAME)                        \
+friend typename MATMUL_MODULE_IN_PRIVATE(NAME);                \
+using NAME = typename MATMUL_MODULE_IN_PRIVATE(NAME)
+
+#define MATMUL_ALLOW_USING_TEMPLATE_PRIVATE(NAME, ...)          \
+using NAME = typename MATMUL_MODULE_IN_PRIVATE(template NAME<__VA_ARGS__>)
+
+/////////////////////////////////////////////////////////////////
 #define MATMUL_CONTEXT()   MATMUL_CAST_TO_IMPL()->var
 #define MATMUL_CONTEXT_CONST() ((const MATMUL_IMPL__*)(this))->var
 

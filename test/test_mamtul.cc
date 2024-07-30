@@ -42,10 +42,10 @@ namespace {
     }
 }
 
-using A_TYPE = matmul::MatmulType<TPosition::GM, CubeFormat::ND, uint16_t>;
-using B_TYPE = matmul::MatmulType<TPosition::GM, CubeFormat::ND, uint16_t>;
-using C_TYPE = matmul::MatmulType<TPosition::GM, CubeFormat::ND, uint32_t>;
-using BIAS_TYPE = matmul::MatmulType<TPosition::GM, CubeFormat::ND, uint16_t>;
+using A_TYPE = MatmulType<TPosition::GM, CubeFormat::ND, uint16_t>;
+using B_TYPE = MatmulType<TPosition::GM, CubeFormat::ND, uint16_t>;
+using C_TYPE = MatmulType<TPosition::GM, CubeFormat::ND, uint32_t>;
+using BIAS_TYPE = MatmulType<TPosition::GM, CubeFormat::ND, uint16_t>;
 
 SCENARIO("Matmul Test") 
 {

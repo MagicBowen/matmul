@@ -22,7 +22,7 @@ class Scheduler {
     MATMUL_USE_MODULE(CopyCubeInB);
     MATMUL_USE_MODULE(MMad);
     MATMUL_USE_MODULE(Co1Buffer);
-    MATMUL_USE_MODULE(CopyCubeOut);
+    MATMUL_USE_MODULE(CopyCubeOut); 
 
 public:
     void Init(const TCubeTiling* tiling) {
