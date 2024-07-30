@@ -13,6 +13,11 @@ enum class InputTypeTag {
     A, B
 };
 
+template<typename A_TYPE, typename B_TYPE>
+struct SrcType {
+    using Type = typename A_TYPE::INNER_T;
+};
+
 template <typename INPUT_TYPE, typename INNER_TYPE = typename INPUT_TYPE::T>
 struct MatmulInputTypeA : INPUT_TYPE {
     using INNER_T = INNER_TYPE;
@@ -33,6 +38,7 @@ public:
     static constexpr uint32_t GetColSize();
     static constexpr uint32_t GetBasicColSize();
     static constexpr uint32_t GetBlockSize();
+    static constexpr uint32_t GetL1LoadNum();
 };
 
 template<typename INPUT_TYPE, typename INNER_TYPE, const auto& MM_CFG>
@@ -54,6 +60,10 @@ public:
     static constexpr uint32_t GetBlockSize() {
         return GetBasicRowSize() * GetBasicColSize();   
     }
+
+    static constexpr uint32_t GetL1LoadNum() {
+        return MM_CFG.stepM * (MM_CFG.singleCoreK / MM_CFG.basicK);
+    }
 };
 
 template<typename INPUT_TYPE, typename INNER_TYPE, const auto& MM_CFG>
@@ -74,6 +84,10 @@ public:
 
     static constexpr uint32_t GetBlockSize() {
         return GetBasicRowSize() * GetBasicColSize();   
+    }
+
+    static constexpr uint32_t GetL1LoadNum() {
+        return MM_CFG.stepN * (MM_CFG.singleCoreK / MM_CFG.basicK);
     }
 };
 

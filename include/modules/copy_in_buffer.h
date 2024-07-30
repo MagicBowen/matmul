@@ -17,30 +17,30 @@ class CopyInBuffer {
     static constexpr uint32_t BLOCK_SIZE = InputTypeTraits<INPUT_TYPE, MM_CFG>::GetBlockSize();
 
 public:
-    void Init(uint32_t blockNum, uint32_t capacity) {
-        this->blockNum = blockNum;
-        this->capacity = capacity;
+    void Init(uint32_t blockNum, uint32_t bufferNum) {
+        blockNum_ = blockNum;
+        bufferNum_ = bufferNum;
     }
 
     void Destroy() {
     }
 
-    LocalTensor<SrcT> AllocTensor(uint32_t row, uint32_t col) {
+    LocalTensor<SrcT> Alloc(uint32_t row, uint32_t col) {
         LocalTensor<SrcT> tensor;
         return tensor;
     }
 
-    void FreeTensor(LocalTensor<SrcT>& tensor) {
+    void Free(LocalTensor<SrcT>& tensor) {
     }
 
-    LocalTensor<SrcT> GetTensor() {
+    LocalTensor<SrcT> Get() {
         LocalTensor<SrcT> tensor;
         return tensor;
     }
 
 private:
-    uint32_t blockNum{0};
-    uint32_t capacity{0};
+    uint32_t blockNum_{0};
+    uint32_t bufferNum_{0};
 };
 
 }

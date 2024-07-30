@@ -22,7 +22,7 @@ class CopyCubeIn {
 
 public:
     void Init() {
-        MATMUL_MODULE(CopyInBuffer)->Init(1, 1);
+        MATMUL_MODULE(CopyInBuffer)->Init(L1_LOAD_NUM, 1);
     }
 
     void Destroy() {
@@ -33,18 +33,21 @@ public:
         addr = input.GetAddr();
     }
 
-    LocalTensor<SrcT> Load(uint32_t row, uint32_t col, uint32_t height, uint32_t width) {
-        auto tensor = MATMUL_MODULE(CopyInBuffer)->AllocTensor(row, col);
-        copy(tensor, row, col, height, width);
+    void SetAddr(const LocalTensor<SrcT>& input) {
+    }
+
+    LocalTensor<SrcT> Load(uint32_t row, uint32_t col) {
+        auto tensor = MATMUL_MODULE(CopyInBuffer)->Alloc(row, col);
+        copy(tensor, row, col);
         return tensor;
     }
 
     void Clear(LocalTensor<SrcT>& tensor) {
-        MATMUL_MODULE(CopyInBuffer)->FreeTensor(tensor);
+        MATMUL_MODULE(CopyInBuffer)->Free(tensor);
     }
 
 private:
-    void copy(LocalTensor<SrcT>& tensor, uint32_t row, uint32_t col, uint32_t height, uint32_t width) {
+    void copy(LocalTensor<SrcT>& tensor, uint32_t row, uint32_t col) {
         // auto dstAddr = tensor.GetAddr();
         // for (uint32_t h = 0; h < height; h++) {
         //     for (uint32_t w = 0; w < width; w++) {
@@ -61,6 +64,8 @@ private:
     const SrcT* addr{nullptr};
 
 private:
+    static constexpr uint32_t L1_LOAD_NUM = InputTypeTraits<INPUT_TYPE, MM_CFG>::GetL1LoadNum();
+
     static constexpr uint32_t BLOCK_SIZE = InputTypeTraits<INPUT_TYPE, MM_CFG>::GetBlockSize();
     static constexpr uint32_t BASIC_ROW_SIZE = InputTypeTraits<INPUT_TYPE, MM_CFG>::GetBasicRowSize();
     static constexpr uint32_t BASIC_COL_SIZE = InputTypeTraits<INPUT_TYPE, MM_CFG>::GetBasicColSize();
@@ -81,11 +86,18 @@ public:
     void SetAddr(const GlobalTensor<SrcT>& input) {
     }
 
-    LocalTensor<SrcT>& Load(uint32_t row, uint32_t col, uint32_t height, uint32_t width) {
+    void SetAddr(const LocalTensor<SrcT>& input) {
+        addr = input.GetAddr();
+    }
+
+    LocalTensor<SrcT>& Load(uint32_t row, uint32_t col) {
     }
 
     void Clear(LocalTensor<SrcT>&) {
     }
+
+private:
+    const SrcT* addr{nullptr};
 };
 
 }

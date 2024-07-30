@@ -6,10 +6,12 @@
 #define ITERATE_CONTROLLER_H
 
 #include "matmul_keyword.h"
+#include "matmul_config.h"
 
 namespace matmul {
 
-template <typename IMPL, const auto& MM_CFG>
+//////////////////////////////////////////////////////////////////////
+template <typename IMPL, const auto& MM_CFG, typename = void>
 class IterateController {
 public:
     bool MoveNext() {
@@ -40,12 +42,40 @@ private:
 private:
     uint32_t curM_{0};
     uint32_t curN_{0};
-    
-    uint32_t curStepM_;
-    uint32_t curStepN_;
-    
-    uint32_t stepMIdx_;
-    uint32_t stepNIdx_;
+};
+
+//////////////////////////////////////////////////////////////////////
+template <typename IMPL, const auto& MM_CFG>
+class IterateController<IMPL, MM_CFG, std::enable_if_t<MM_CFG.iterOrder == IterateOrder::ORDER_N>> {
+public:
+    bool MoveNext() {
+        if (IsFinished()) return false;
+
+        if (++curM_ >= MATMUL_CONST_PARAM_VAR.mIter_) {
+            curM_ = 0;
+            if (++curN_ >= MATMUL_CONST_PARAM_VAR.nIter_) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    uint32_t GetRowIndex() const {
+        return curM_;
+    }
+
+    uint32_t GetColIndex() const {
+        return curN_;
+    }
+
+private:
+    bool IsFinished() const {
+        return curN_ >= MATMUL_CONST_PARAM_VAR.nIter_;
+    }
+
+private:
+    uint32_t curM_{0};
+    uint32_t curN_{0};
 };
 
 }

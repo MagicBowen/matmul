@@ -47,11 +47,11 @@ struct MatmulConfig {
     bool enUnitFlag = true;
 
     uint8_t iterateMode = IterateMode::ITERATE_MODE_DEFAULT;
-    IterateOrder iterateOrder;
+    IterateOrder iterateOrder = IterateOrder::ORDER_M;
     ScheduleType scheduleType;
 };
 
-constexpr inline MatmulConfig GetNormalConfig(const IterateOrder iterateOrder = IterateOrder::UNDEF,
+constexpr inline MatmulConfig GetNormalConfig(const IterateOrder iterateOrder = IterateOrder::ORDER_M,
     const ScheduleType scheduleType = ScheduleType::INNER_PRODUCT, const bool enUnitFlag = true)
 {
     return {
@@ -65,10 +65,8 @@ constexpr inline MatmulConfig GetNormalConfig(const IterateOrder iterateOrder = 
         .singleCoreM = 8,
         .singleCoreN = 8,
         .singleCoreK = 6,
-        .stepM = 4,
-        .stepN = 4,
-        .baseMN = 0,
-        .singleCoreMN = 0,
+        .stepM = 2,
+        .stepN = 2,
         .enUnitFlag = enUnitFlag,
         .iterateMode = IterateMode::ITERATE_MODE_DEFAULT,
         .iterateOrder = iterateOrder,

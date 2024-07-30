@@ -26,6 +26,8 @@ class MatmulImpl
 , MATMUL_IMPORT_MODULE(CopyInBufferA)
 , MATMUL_IMPORT_MODULE(CopyInBufferB)
 , MATMUL_IMPORT_MODULE(MMad)
+, MATMUL_IMPORT_MODULE(Co1Buffer)
+, MATMUL_IMPORT_MODULE(CopyCubeOut)
 {
     using L0cT = typename A_TYPE::T;
     using SrcT = typename A_TYPE::T;
@@ -42,18 +44,22 @@ private:
     MATMUL_ALLOW_USING(CopyInBufferA);
     MATMUL_ALLOW_USING(CopyInBufferB);
     MATMUL_ALLOW_USING(MMad);
+    MATMUL_ALLOW_USING(Co1Buffer);
+    MATMUL_ALLOW_USING(CopyCubeOut);
 
     template<InputTypeTag TAG>
     using CopyInBuffer = std::conditional_t<TAG == InputTypeTag::A, CopyInBufferA, CopyInBufferB>;
 
 private:
     MATMUL_DFX_PROXY_REGISTER_DEFAULT();
-    MATMUL_DFX_PROXY_REGISTER(MMad, Compute);
-    MATMUL_DFX_PROXY_REGISTER(Scheduler, Schedule);
+    MATMUL_DFX_PROXY_REGISTER(Scheduler, Init, Destroy, ScheduleOnce, Schedule);
     MATMUL_DFX_PROXY_REGISTER(CopyCubeInA, Init, Destroy, SetAddr, Load, Clear);
     MATMUL_DFX_PROXY_REGISTER(CopyCubeInB, Init, Destroy, SetAddr, Load, Clear);
-    MATMUL_DFX_PROXY_REGISTER(CopyInBufferA, Init, Destroy, AllocTensor, FreeTensor, GetTensor);
-    MATMUL_DFX_PROXY_REGISTER(CopyInBufferB, Init, Destroy, AllocTensor, FreeTensor, GetTensor);
+    MATMUL_DFX_PROXY_REGISTER(CopyInBufferA, Init, Destroy, Alloc, Free, Get);
+    MATMUL_DFX_PROXY_REGISTER(CopyInBufferB, Init, Destroy, Alloc, Free, Get);
+    MATMUL_DFX_PROXY_REGISTER(MMad, Compute);
+    MATMUL_DFX_PROXY_REGISTER(Co1Buffer, Init, Destroy, Alloc, Free, Get);
+    MATMUL_DFX_PROXY_REGISTER(CopyCubeOut, Copy);
 
 private:
     using IMPL = MATMUL_IMPL_TYPE;
@@ -63,14 +69,12 @@ private:
 
 public:
     void Init(const TCubeTiling* tiling) {
-        InitVar(tiling);
-        MATMUL_MODULE(CopyCubeInA)->Init();
-        MATMUL_MODULE(CopyCubeInB)->Init();
+        InitContext(tiling);
+        MATMUL_MODULE(Scheduler)->Init(tiling);
     }
 
     void End() {
-        MATMUL_MODULE(CopyCubeInA)->Destroy();
-        MATMUL_MODULE(CopyCubeInB)->Destroy();
+        MATMUL_MODULE(Scheduler)->Destroy();
     }
 
     void SetTensorA(const GlobalTensor<SrcAT>& leftMatrix) {
@@ -102,19 +106,19 @@ public:
     }
 
     bool Iterate() {
-        return true;
+        return MATMUL_MODULE(Scheduler)->ScheduleOnce();
     }
 
-    void IterateAll(GlobalTensor<DstT>&) {
+    void IterateAll(GlobalTensor<DstT>& tensor) {
+        return MATMUL_MODULE(Scheduler)->Schedule(tensor);
     }
 
     void IterateAll(LocalTensor<DstT>& tensor) {
-        while(MATMUL_MODULE(Scheduler)->Schedule(tensor)) {
-        }
+        return MATMUL_MODULE(Scheduler)->Schedule(tensor);
     }
 
 private:
-    void InitVar(const TCubeTiling* tiling) {
+    void InitContext(const TCubeTiling* tiling) {
         var.tiling = tiling;
         var.singleCoreM_ = MM_CFG.singleCoreM;
         var.singleCoreN_ = MM_CFG.singleCoreN;
