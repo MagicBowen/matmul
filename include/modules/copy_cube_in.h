@@ -24,7 +24,7 @@ class CopyCubeIn {
 
 public:
     void Init() {
-        MATMUL_MODULE(CopyInBuffer)->Init(L1_LOAD_NUM, 1);
+        MATMUL_MODULE(CopyInBuffer)->Init(L1_LOAD_SIZE, 1);
     }
 
     void Destroy() {
@@ -52,7 +52,7 @@ private:
     const SrcT* addr{nullptr};
 
 private:
-    static constexpr uint32_t L1_LOAD_NUM = InputTypeTraits<INPUT_TYPE, MM_CFG>::GetL1LoadNum();
+    static constexpr uint32_t L1_LOAD_SIZE = InputTypeTraits<INPUT_TYPE, MM_CFG>::GetL1LoadSize();
 
     static constexpr uint32_t BLOCK_SIZE = InputTypeTraits<INPUT_TYPE, MM_CFG>::GetBlockSize();
     static constexpr uint32_t BASIC_ROW_SIZE = InputTypeTraits<INPUT_TYPE, MM_CFG>::GetBasicRowSize();

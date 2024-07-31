@@ -31,62 +31,76 @@ struct MatmulInputTypeB : INPUT_TYPE {
 };
 
 template<typename INPUT_TYPE, const auto& MM_CFG>
-class InputTypeTraits {
-public:
+struct InputTypeTraits {
     static constexpr uint32_t GetRowSize();
-    static constexpr uint32_t GetBasicRowSize();
     static constexpr uint32_t GetColSize();
+    static constexpr uint32_t GetRowBytes();
+    static constexpr uint32_t GetColBytes();
+    static constexpr uint32_t GetBasicRowSize();
     static constexpr uint32_t GetBasicColSize();
     static constexpr uint32_t GetBlockSize();
-    static constexpr uint32_t GetL1LoadNum();
+    static constexpr uint32_t GetBlockBytes();
+    static constexpr uint32_t GetL1LoadSize();
 };
 
 template<typename INPUT_TYPE, typename INNER_TYPE, const auto& MM_CFG>
-class InputTypeTraits<MatmulInputTypeA<INPUT_TYPE, INNER_TYPE>, MM_CFG> {
-public:
+struct InputTypeTraits<MatmulInputTypeA<INPUT_TYPE, INNER_TYPE>, MM_CFG> {
     static constexpr uint32_t GetRowSize() {
         return MM_CFG.singleCoreK;
     }
-    static constexpr uint32_t GetBasicRowSize() {
-        return MM_CFG.basicM;
+    static constexpr uint32_t GetRowBytes() {
+        return GetRowSize() * sizeof(INNER_TYPE);
     }
     static constexpr uint32_t GetColSize() {
         return MM_CFG.singleCoreM;
     }
+    static constexpr uint32_t GetColBytes() {
+        return GetColSize() * sizeof(INNER_TYPE);
+    }
+    static constexpr uint32_t GetBasicRowSize() {
+        return MM_CFG.basicM;
+    }
     static constexpr uint32_t GetBasicColSize() {
         return MM_CFG.basicK;
     }
-
     static constexpr uint32_t GetBlockSize() {
         return GetBasicRowSize() * GetBasicColSize();   
     }
-
-    static constexpr uint32_t GetL1LoadNum() {
+    static constexpr uint32_t GetBlockBytes() {
+        return GetBlockSize() * sizeof(INNER_TYPE);   
+    }
+    static constexpr uint32_t GetL1LoadSize() {
         return MM_CFG.stepM * (MM_CFG.singleCoreK / MM_CFG.basicK);
     }
 };
 
 template<typename INPUT_TYPE, typename INNER_TYPE, const auto& MM_CFG>
-class InputTypeTraits<MatmulInputTypeB<INPUT_TYPE, INNER_TYPE>, MM_CFG> {
-public:
+struct InputTypeTraits<MatmulInputTypeB<INPUT_TYPE, INNER_TYPE>, MM_CFG> {
     static constexpr uint32_t GetRowSize() {
         return MM_CFG.singleCoreN;
     }
-    static constexpr uint32_t GetBasicRowSize() {
-        return MM_CFG.basicK;
+    static constexpr uint32_t GetRowBytes() {
+        return GetRowSize() * sizeof(INNER_TYPE);
     }
     static constexpr uint32_t GetColSize() {
         return MM_CFG.singleCoreK;
     }
+    static constexpr uint32_t GetColBytes() {
+        return GetColSize() * sizeof(INNER_TYPE);
+    }
+    static constexpr uint32_t GetBasicRowSize() {
+        return MM_CFG.basicK;
+    }
     static constexpr uint32_t GetBasicColSize() {
         return MM_CFG.basicN;
     }
-
     static constexpr uint32_t GetBlockSize() {
         return GetBasicRowSize() * GetBasicColSize();   
     }
-
-    static constexpr uint32_t GetL1LoadNum() {
+    static constexpr uint32_t GetBlockBytes() {
+        return GetBlockSize() * sizeof(INNER_TYPE);   
+    }
+    static constexpr uint32_t GetL1LoadSize() {
         return MM_CFG.stepN * (MM_CFG.singleCoreK / MM_CFG.basicK);
     }
 };
