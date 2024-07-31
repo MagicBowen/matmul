@@ -32,15 +32,6 @@ struct MatmulInputTypeB : INPUT_TYPE {
 
 template<typename INPUT_TYPE, const auto& MM_CFG>
 struct InputTypeTraits {
-    static constexpr uint32_t GetRowSize();
-    static constexpr uint32_t GetColSize();
-    static constexpr uint32_t GetRowBytes();
-    static constexpr uint32_t GetColBytes();
-    static constexpr uint32_t GetBasicRowSize();
-    static constexpr uint32_t GetBasicColSize();
-    static constexpr uint32_t GetBlockSize();
-    static constexpr uint32_t GetBlockBytes();
-    static constexpr uint32_t GetL1LoadSize();
 };
 
 template<typename INPUT_TYPE, typename INNER_TYPE, const auto& MM_CFG>
@@ -69,8 +60,26 @@ struct InputTypeTraits<MatmulInputTypeA<INPUT_TYPE, INNER_TYPE>, MM_CFG> {
     static constexpr uint32_t GetBlockBytes() {
         return GetBlockSize() * sizeof(INNER_TYPE);   
     }
-    static constexpr uint32_t GetL1LoadSize() {
-        return MM_CFG.stepM * (MM_CFG.singleCoreK / MM_CFG.basicK);
+    static constexpr uint32_t GetBufferStep() {
+        return MM_CFG.stepM;
+    }
+    static constexpr uint32_t GetOneStepBlockNum() {
+        return MM_CFG.singleCoreK / MM_CFG.basicK;
+    }
+    static constexpr uint32_t GetOneStepSize() {
+        return GetOneStepBlockNum() * GetBlockSize();
+    }
+    static constexpr uint32_t GetLoadBlockNum() {
+        return GetBufferStep() * GetOneStepBlockNum();
+    }
+    static constexpr uint32_t GetLoadSize() {
+        return GetLoadBlockNum() * GetBlockSize();
+    }
+    static constexpr uint32_t GetBufferStepIndex(uint32_t row, uint32_t col) {
+        return row % GetBufferStep();
+    }
+    static constexpr uint32_t GetOffsetFromOrigin(uint32_t row, uint32_t col) {
+        return row  * GetOneStepSize();
     }
 };
 
@@ -100,8 +109,26 @@ struct InputTypeTraits<MatmulInputTypeB<INPUT_TYPE, INNER_TYPE>, MM_CFG> {
     static constexpr uint32_t GetBlockBytes() {
         return GetBlockSize() * sizeof(INNER_TYPE);   
     }
-    static constexpr uint32_t GetL1LoadSize() {
-        return MM_CFG.stepN * (MM_CFG.singleCoreK / MM_CFG.basicK);
+    static constexpr uint32_t GetBufferStep() {
+        return MM_CFG.stepN;
+    }
+    static constexpr uint32_t GetOneStepBlockNum() {
+        return MM_CFG.singleCoreK / MM_CFG.basicK;
+    }
+    static constexpr uint32_t GetOneStepSize() {
+        return GetOneStepBlockNum() * GetBlockSize();
+    }
+    static constexpr uint32_t GetLoadBlockNum() {
+        return GetBufferStep() * GetOneStepBlockNum();
+    }
+    static constexpr uint32_t GetLoadSize() {
+        return GetLoadBlockNum() * GetBlockSize();
+    }
+    static constexpr uint32_t GetBufferStepIndex(uint32_t row, uint32_t col) {
+        return col % GetBufferStep();
+    }
+    static constexpr uint32_t GetOffsetFromOrigin(uint32_t row, uint32_t col) {
+        return col * GetOneStepSize();
     }
 };
 

@@ -30,8 +30,8 @@ struct LocalTensor {
     }
 
 private:
-    T* addr;
-    uint32_t length;
+    T* addr{nullptr};
+    uint32_t length{0};
 };
 
 template<typename T>
@@ -54,8 +54,8 @@ struct GlobalTensor {
     }
 
 private:
-    T* addr;
-    uint32_t length;
+    T* addr{nullptr};
+    uint32_t length{0};
 };
 
 template<typename T>

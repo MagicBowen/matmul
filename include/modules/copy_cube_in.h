@@ -24,7 +24,7 @@ class CopyCubeIn {
 
 public:
     void Init() {
-        MATMUL_MODULE(CopyInBuffer)->Init(L1_LOAD_SIZE, 1);
+        MATMUL_MODULE(CopyInBuffer)->Init(L1_LOAD_SIZE, L1_BUFFER_NUM);
     }
 
     void Destroy() {
@@ -32,16 +32,29 @@ public:
     }
 
     void SetAddr(const GlobalTensor<SrcT>& input) {
-        addr = input.GetAddr();
+        addr = const_cast<SrcT*>(input.GetAddr());
     }
 
     void SetAddr(const LocalTensor<SrcT>& input) {
     }
 
     LocalTensor<SrcT> Load(uint32_t row, uint32_t col) {
-        auto tensor = MATMUL_MODULE(CopyInBuffer)->Alloc(row, col);
-        MATMUL_MODULE(HalInstruction)->CopyND2NZ();
-        return tensor;
+        uint32_t stepIdx = InputTypeTraits<INPUT_TYPE, MM_CFG>::GetBufferStepIndex(row, col);
+        if (stepIdx == 0) {
+            if (cacheTensor.GetAddr()) {
+                MATMUL_MODULE(CopyInBuffer)->Free(cacheTensor);
+            }
+            cacheTensor = MATMUL_MODULE(CopyInBuffer)->Alloc();
+
+            GlobalTensor<SrcT> srcTensor;
+            srcTensor.SetAddr(addr + InputTypeTraits<INPUT_TYPE, MM_CFG>::GetOffsetFromOrigin(row, col), L1_LOAD_SIZE);
+
+            MATMUL_MODULE(HalInstruction)->CopyND2NZ(cacheTensor, srcTensor, L1_LOAD_SIZE);
+        } 
+        
+        LocalTensor<SrcT> result;
+        result.SetAddr(cacheTensor.GetAddr() + stepIdx * ONE_STEP_CACHE_SIZE, ONE_STEP_CACHE_SIZE);
+        return result;
     }
 
     void Clear(LocalTensor<SrcT>& tensor) {
@@ -49,16 +62,13 @@ public:
     }
 
 private:
-    const SrcT* addr{nullptr};
+    SrcT* addr{nullptr};
+    LocalTensor<SrcT> cacheTensor;
 
 private:
-    static constexpr uint32_t L1_LOAD_SIZE = InputTypeTraits<INPUT_TYPE, MM_CFG>::GetL1LoadSize();
-
-    static constexpr uint32_t BLOCK_SIZE = InputTypeTraits<INPUT_TYPE, MM_CFG>::GetBlockSize();
-    static constexpr uint32_t BASIC_ROW_SIZE = InputTypeTraits<INPUT_TYPE, MM_CFG>::GetBasicRowSize();
-    static constexpr uint32_t BASIC_COL_SIZE = InputTypeTraits<INPUT_TYPE, MM_CFG>::GetBasicColSize();
-    static constexpr uint32_t ROW_SIZE = InputTypeTraits<INPUT_TYPE, MM_CFG>::GetRowSize();
-    static constexpr uint32_t COL_SIZE = InputTypeTraits<INPUT_TYPE, MM_CFG>::GetColSize();
+    static constexpr uint32_t L1_LOAD_SIZE = InputTypeTraits<INPUT_TYPE, MM_CFG>::GetLoadSize();
+    static constexpr uint32_t ONE_STEP_CACHE_SIZE = InputTypeTraits<INPUT_TYPE, MM_CFG>::GetOneStepSize();
+    static constexpr uint32_t L1_BUFFER_NUM = 2;
 };
 
 /////////////////////////////////////////////////////////////////
@@ -79,6 +89,8 @@ public:
     }
 
     LocalTensor<SrcT>& Load(uint32_t row, uint32_t col) {
+        LocalTensor<SrcT> tensor;
+        return tensor;
     }
 
     void Clear(LocalTensor<SrcT>&) {
