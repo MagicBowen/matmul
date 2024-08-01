@@ -42,17 +42,16 @@ public:
             return false;
         }
 
-        auto row = MATMUL_MODULE(IterateController)->GetRowIndex();
-        auto col = MATMUL_MODULE(IterateController)->GetColIndex();
+        MATMUL_MODULE(IterateController)->Reduce([this](auto m, auto n, auto k) {
+            auto a = MATMUL_MODULE(CopyCubeInA)->Load(m, k);
+            auto b = MATMUL_MODULE(CopyCubeInB)->Load(k, n);
+            auto c = MATMUL_MODULE(Co1Buffer)->Alloc();
 
-        auto a = MATMUL_MODULE(CopyCubeInA)->Load(row, col);
-        auto b = MATMUL_MODULE(CopyCubeInB)->Load(row, col);
+            MATMUL_MODULE(MMad)->Compute(c, a, b);
 
-        LocalTensor<typename C_TYPE::T> c = MATMUL_MODULE(Co1Buffer)->Alloc();
-        MATMUL_MODULE(MMad)->Compute(c, a, b);
-
-        MATMUL_MODULE(CopyCubeInA)->Clear(a);
-        MATMUL_MODULE(CopyCubeInB)->Clear(b);
+            MATMUL_MODULE(CopyCubeInA)->Clear(a);
+            MATMUL_MODULE(CopyCubeInB)->Clear(b);
+        });
 
         return true;
     }
