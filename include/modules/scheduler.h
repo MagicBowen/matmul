@@ -39,7 +39,7 @@ public:
     }
 
     bool ScheduleOnce() {
-        if (MATMUL_MODULE(IterateController)->MoveNext()) {
+        if (!MATMUL_MODULE(IterateController)->MoveNext()) {
             return false;
         }
 
