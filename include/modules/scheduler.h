@@ -9,6 +9,7 @@
 #include "matmul_tiling.h"
 #include "modules/iterate_controller.h"
 #include "modules/copy_cube_in.h"
+#include "modules/split_load.h"
 #include "modules/mmad.h"
 #include "modules/co1_buffer.h"
 #include "modules/copy_cube_out.h"
@@ -20,6 +21,8 @@ class Scheduler {
     MATMUL_USE_MODULE(IterateController);
     MATMUL_USE_MODULE(CopyCubeInA);
     MATMUL_USE_MODULE(CopyCubeInB);
+    MATMUL_USE_MODULE(SplitLoadA);
+    MATMUL_USE_MODULE(SplitLoadB);
     MATMUL_USE_MODULE(MMad);
     MATMUL_USE_MODULE(Co1Buffer);
     MATMUL_USE_MODULE(CopyCubeOut); 
@@ -44,14 +47,17 @@ public:
         }
 
         MATMUL_MODULE(IterateController)->Reduce([this](auto m, auto n, auto k) {
-            auto a = MATMUL_MODULE(CopyCubeInA)->Load(m, k);
-            auto b = MATMUL_MODULE(CopyCubeInB)->Load(k, n);
+            auto tensorA = MATMUL_MODULE(CopyCubeInA)->Load(m, k);
+            auto tensorB = MATMUL_MODULE(CopyCubeInB)->Load(k, n);
+
             auto c = MATMUL_MODULE(Co1Buffer)->Alloc();
+            auto a = MATMUL_MODULE(SplitLoadA)->Split(tensorA, k);
+            auto b = MATMUL_MODULE(SplitLoadB)->Split(tensorB, k);
 
             MATMUL_MODULE(MMad)->Compute(c, a, b);
 
-            MATMUL_MODULE(CopyCubeInA)->Clear(a);
-            MATMUL_MODULE(CopyCubeInB)->Clear(b);
+            MATMUL_MODULE(CopyCubeInA)->Clear(tensorA);
+            MATMUL_MODULE(CopyCubeInB)->Clear(tensorB);
         });
 
         return true;

@@ -5,10 +5,11 @@
 #ifndef MATMUL_POLICY_H
 #define MATMUL_POLICY_H
 
+#include "modules/scheduler.h"
 #include "modules/iterate_controller.h"
 #include "modules/copy_cube_in.h"
 #include "modules/copy_in_buffer.h"
-#include "modules/scheduler.h"
+#include "modules/split_load.h"
 #include "modules/mmad.h"
 #include "modules/co1_buffer.h"
 #include "modules/copy_cube_out.h"
@@ -34,6 +35,9 @@ struct MatmulPolicyDefault {
 
     using CopyInBufferA     =   matmul::CopyInBuffer<IMPL, INPUT_TYPE_A, MM_CFG>;
     using CopyInBufferB     =   matmul::CopyInBuffer<IMPL, INPUT_TYPE_B, MM_CFG>;
+
+    using SplitLoadA        =   matmul::SplitLoad<INPUT_TYPE_A, MM_CFG>;
+    using SplitLoadB        =   matmul::SplitLoad<INPUT_TYPE_B, MM_CFG>;
 
     using MMad              =   matmul::MMad<IMPL, MMAD_SRC_TYPE, typename C_TYPE::T, MM_CFG>;
     using Co1Buffer         =   matmul::Co1Buffer<IMPL, C_TYPE, MM_CFG>;
