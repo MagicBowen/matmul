@@ -26,6 +26,7 @@ class Scheduler {
 
 public:
     void Init(const TCubeTiling* tiling) {
+        MATMUL_MODULE(IterateController)->Init();
         MATMUL_MODULE(CopyCubeInA)->Init();
         MATMUL_MODULE(CopyCubeInB)->Init();
         MATMUL_MODULE(Co1Buffer)->Init();
