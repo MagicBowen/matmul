@@ -43,13 +43,13 @@ public:
         Reset();
     }
 
-    bool Forward() {
+    bool ForwardMN() {
         if (IsFirstIterate()) return true;
         return MoveNext();
     }
 
     template <typename COMPUTE>
-    void Reduce(COMPUTE compute) {
+    void ReduceK(COMPUTE compute) {
         for (uint32_t k = 0; k < MATMUL_CONTEXT().kIter_; ++k) {
             compute(GetRowIndex(), GetColIndex(), k);
         }
@@ -67,6 +67,12 @@ public:
         state_[ORDER_M].Reset(MM_CFG.stepM, MATMUL_CONTEXT().mIter_);
         state_[ORDER_N].Reset(MM_CFG.stepN, MATMUL_CONTEXT().nIter_);
     }
+
+////////////////////////////////////////
+    bool IsFinished() const {
+        return true;
+    }
+////////////////////////////////////////
 
 private:
     bool IsFirstIterate() const {
