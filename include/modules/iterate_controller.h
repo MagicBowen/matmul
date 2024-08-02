@@ -9,159 +9,83 @@
 #include "matmul_config.h"
 
 namespace matmul {
-//////////////////////////////////////////////////////////////////////
-template<const auto& MM_CFG>
-class IterateState {
+
+template <typename IMPL, const auto& MM_CFG>
+class IterateController {
+    enum {
+        ORDER_M = 0,
+        ORDER_N = 1,
+        ORDER_MAX = 2
+    };
+
+    struct State {
+        void Reset(uint32_t stepNum, uint32_t iterNum) {
+            curIdx_ = 0;
+            stepIdx_ = 0;
+            curStep_ = stepNum;
+            iterNum_ = iterNum;
+        }
+
+        uint32_t curIdx_{0};
+        uint32_t stepIdx_{0};
+        uint32_t curStep_{0};
+        uint32_t iterNum_{0};
+    } state_[ORDER_MAX];
+
+    static constexpr uint32_t MAIN_ORDER = 
+        (MM_CFG.iterateOrder == IterateOrder::ORDER_M) ? ORDER_M : ORDER_N;
+        
+    static constexpr uint32_t SUB_ORDER = 
+        (MM_CFG.iterateOrder == IterateOrder::ORDER_M) ? ORDER_N : ORDER_M;
+
 public:
     void Init() {
         Reset();
     }
 
-    uint32_t GetRowIndex() const {
-        return curM_;
-    }
-
-    uint32_t GetColIndex() const {
-        return curN_;
-    }
-
-    void Reset() {
-        curM_ = 0;
-        curN_ = 0;
-        stepMIdx_ = 0;
-        stepNIdx_ = 0;
-        curStepM_ = MM_CFG.stepM;
-        curStepN_ = MM_CFG.stepN;
-    }
-
-    bool IsFirstIterate() const {
-        return curM_ == 0 && curN_ == 0;
-    }
-
-protected:
-    uint32_t curM_{0};
-    uint32_t curN_{0};
-    uint32_t stepMIdx_{0};
-    uint32_t stepNIdx_{0};
-    uint32_t curStepM_{MM_CFG.stepM};
-    uint32_t curStepN_{MM_CFG.stepN};
-};
-
-//////////////////////////////////////////////////////////////////////
-template<const auto& MM_CFG, typename = void>
-class IterateImpl : public IterateState<MM_CFG> {
-    using State = IterateState<MM_CFG>;
-public:
-    auto& MainIdx() {
-        return State::curM_;
-    }
-
-    auto& SubIdx() {
-        return State::curN_;
-    }
-
-    auto& MainStepIdx() {
-        return State::stepMIdx_;
-    }
-
-    auto& SubStepIdx() {
-        return State::stepNIdx_;
-    }
-
-    auto& MainStep() {
-        return State::curStepM_;
-    }
-
-    auto& SubStep() {
-        return State::curStepN_;
-    }
-
-    template<typename CONTEXT>
-    auto& MainIter(CONTEXT& ctx) {
-        return ctx.mIter_;
-    }
-
-    template<typename CONTEXT>
-    auto& SubIter(CONTEXT& ctx) {
-        return ctx.nIter_;
-    }
-};
-
-template<const auto& MM_CFG>
-class IterateImpl<MM_CFG, std::enable_if_t<MM_CFG.iterOrder == IterateOrder::ORDER_N>> 
-: public IterateState<MM_CFG> {
-    using State = IterateState<MM_CFG>;
-public:
-    auto& MainIdx() {
-        return State::curN_;
-    }
-
-    auto& SubIdx() {
-        return State::curM_;
-    }
-
-    auto& MainStepIdx() {
-        return State::stepNIdx_;
-    }
-
-    auto& SubStepIdx() {
-        return State::stepMIdx_;
-    }
-
-    auto& MainStep() {
-        return State::curStepN_;
-    }
-
-    auto& SubStep() {
-        return State::curStepM_;
-    }
-
-    template<typename CONTEXT>
-    auto& MainIter(CONTEXT& ctx) {
-        return ctx.nIter_;
-    }
-
-    template<typename CONTEXT>
-    auto& SubIter(CONTEXT& ctx) {
-        return ctx.mIter_;
-    }
-};
-
-//////////////////////////////////////////////////////////////////////
-template <typename IMPL, const auto& MM_CFG>
-class IterateController : private IterateImpl<MM_CFG> {
-
-    using State = IterateState<MM_CFG>;
-    using Iter  = IterateImpl<MM_CFG>;
-
-public:
-    using State::Init;
-    using State::GetRowIndex;
-    using State::GetColIndex;
-    using State::Reset;
-
-    bool MoveNext() {
-        if (State::IsFirstIterate()) return true;
-
-        if (++Iter::SubIdx() >= Iter::SubStepIdx() + Iter::SubStep()) {
-            Iter::SubIdx() = Iter::SubStepIdx();
-            if (++Iter::MainIdx() >= Iter::MainIter(MATMUL_CONTEXT())) {
-                Iter::MainIdx() = 0;
-                Iter::SubStepIdx() += Iter::SubStep();
-                if (Iter::SubStepIdx() >= Iter::SubIter(MATMUL_CONTEXT())) {
-                    return false;
-                }
-                Iter::SubIdx() = Iter::SubStepIdx();
-            }
-        }
-        return true;
+    bool Forward() {
+        if (IsFirstIterate()) return true;
+        return MoveNext();
     }
 
     template <typename COMPUTE>
     void Reduce(COMPUTE compute) {
         for (uint32_t k = 0; k < MATMUL_CONTEXT().kIter_; ++k) {
-            compute(State::GetRowIndex(), State::GetColIndex(), k);
+            compute(GetRowIndex(), GetColIndex(), k);
         }
+    }
+
+    uint32_t GetRowIndex() const {
+        return state_[ORDER_M].curIdx_;
+    }
+
+    uint32_t GetColIndex() const {
+        return state_[ORDER_N].curIdx_;
+    }
+
+    void Reset() {
+        state_[ORDER_M].Reset(MM_CFG.stepM, MATMUL_CONTEXT().mIter_);
+        state_[ORDER_N].Reset(MM_CFG.stepN, MATMUL_CONTEXT().nIter_);
+    }
+
+private:
+    bool IsFirstIterate() const {
+        return state_[ORDER_M].curIdx_ == 0 && state_[ORDER_N].curIdx_ == 0;
+    }
+
+    bool MoveNext() {
+       if (++state_[SUB_ORDER].curIdx_ >= state_[SUB_ORDER].stepIdx_ + state_[SUB_ORDER].curStep_) {
+            state_[SUB_ORDER].curIdx_ = state_[SUB_ORDER].stepIdx_;
+            if (++state_[MAIN_ORDER].curIdx_ >= state_[MAIN_ORDER].iterNum_) {
+                state_[MAIN_ORDER].curIdx_ = 0;
+                state_[SUB_ORDER].stepIdx_ += state_[SUB_ORDER].curStep_;
+                if (state_[SUB_ORDER].stepIdx_ >= state_[SUB_ORDER].iterNum_) {
+                    return false;
+                }
+                state_[SUB_ORDER].curIdx_ = state_[SUB_ORDER].stepIdx_;
+            }
+        }
+        return true;        
     }
 };
 
