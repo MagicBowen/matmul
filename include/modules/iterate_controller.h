@@ -68,12 +68,6 @@ public:
         state_[ORDER_N].Reset(MM_CFG.stepN, MATMUL_CONTEXT().nIter_);
     }
 
-////////////////////////////////////////
-    bool IsFinished() const {
-        return true;
-    }
-////////////////////////////////////////
-
 private:
     bool IsFirstIterate() const {
         return state_[ORDER_M].curIdx_ == 0 && state_[ORDER_N].curIdx_ == 0;
