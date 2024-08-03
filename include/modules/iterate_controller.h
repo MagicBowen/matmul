@@ -43,13 +43,13 @@ public:
         Reset();
     }
 
-    bool ForwardMN() {
+    bool Forward() {
         if (IsFirstIterate()) return true;
-        return MoveNext();
+        return ForwardMN();
     }
 
     template <typename COMPUTE>
-    void ReduceK(COMPUTE compute) {
+    void Reduce(COMPUTE compute) {
         for (uint32_t k = 0; k < MATMUL_CONTEXT().kIter_; ++k) {
             compute(GetRowIndex(), GetColIndex(), k);
         }
@@ -73,7 +73,7 @@ private:
         return state_[ORDER_M].curIdx_ == 0 && state_[ORDER_N].curIdx_ == 0;
     }
 
-    bool MoveNext() {
+    bool ForwardMN() {
        if (++state_[SUB_ORDER].curIdx_ >= state_[SUB_ORDER].stepIdx_ + state_[SUB_ORDER].curStep_) {
             state_[SUB_ORDER].curIdx_ = state_[SUB_ORDER].stepIdx_;
             if (++state_[MAIN_ORDER].curIdx_ >= state_[MAIN_ORDER].iterNum_) {

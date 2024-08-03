@@ -42,11 +42,11 @@ public:
     }
 
     bool ScheduleOnce() {
-        if (!MATMUL_MODULE(IterateController)->ForwardMN()) {
+        if (!MATMUL_MODULE(IterateController)->Forward()) {
             return false;
         }
 
-        MATMUL_MODULE(IterateController)->ReduceK([this](auto m, auto n, auto k) {
+        MATMUL_MODULE(IterateController)->Reduce([this](auto m, auto n, auto k) {
             auto tensorA = MATMUL_MODULE(CopyCubeInA)->Load(m, k);
             auto tensorB = MATMUL_MODULE(CopyCubeInB)->Load(k, n);
 
@@ -63,30 +63,23 @@ public:
         return true;
     }
 
-    // bool ScheduleOnceNew () {
-    //     if (MATMUL_MODULE(IterateController)->IsFinished()) {
-    //         return true;
-    //     }
-
-    //     MATMUL_MODULE(IterateController)->ForwardMN();
-
-    //     auto row = MATMUL_MODULE(IterateController)->GetRowIndex();
-    //     auto col = MATMUL_MODULE(IterateController)->GetColIndex();
-
-    //     auto tensorA = MATMUL_MODULE(CopyCubeInA)->Load(row, col);
-    //     auto tensorB = MATMUL_MODULE(CopyCubeInB)->Load(row, col);
-
-    //     MATMUL_MODULE(IterateController)->ReduceK([this](auto m, auto n, auto k) {
-    //         auto a = MATMUL_MODULE(SplitLoadA)->Split(tensorA, m, n, k);
-    //         auto b = MATMUL_MODULE(SplitLoadB)->Split(tensorB, m, n, k);
-    //         auto c = MATMUL_MODULE(Co1Buffer)->Alloc();
+    // bool ScheduleOnceSteam () {
+    //     return MATMUL_MODULE(IterateController)
+    //     ->Forward([this](auto row, auto col) {
+    //         auto tensorA = MATMUL_MODULE(CopyCubeInA)->Load(row, col);
+    //         auto tensorB = MATMUL_MODULE(CopyCubeInB)->Load(row, col);
+    //         auto tensorC = MATMUL_MODULE(Co1Buffer)->Alloc();
+    //     })
+    //     ->Reduce([this](auto m, auto n, auto k, auto tensorA, auto tensorB, auto tensorC) {
+    //         auto a = MATMUL_MODULE(SplitLoadA)->Split(tensorA, m, k);
+    //         auto b = MATMUL_MODULE(SplitLoadB)->Split(tensorB, k, n);
+    //         auto c = MATMUL_MODULE(SplitC)->Split(tensorC, m, n);
     //         MATMUL_MODULE(MMad)->Compute(c, a, b);
+    //     })
+    //     ->Submit([this](auto row, auto col) {
+    //         auto tensorA = MATMUL_MODULE(CopyCubeInA)->Clear(row, col);
+    //         auto tensorB = MATMUL_MODULE(CopyCubeInB)->Clear(row, col);
     //     });
-
-    //     MATMUL_MODULE(CopyCubeInA)->Clear(tensorA);
-    //     MATMUL_MODULE(CopyCubeInB)->Clear(tensorB);
-
-    //     return false;
     // }
 
     template <typename TENSOR>
