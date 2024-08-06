@@ -15,6 +15,7 @@ namespace matmul {
 template <typename T>                                                       \
 struct MatmulDfxProxy : T {                                                 \
     auto operator->() { return this; }                                      \
+    operator T*() { return this; }                                          \
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -121,11 +122,13 @@ template <> struct MatmulDfxProxy<MODULE> {                                 \
     MatmulDfxProxy(MODULE& module) : proxy{module} {}                       \
     struct FuncProxy {                                                      \
         FuncProxy(MODULE& module) : m_{module} {}                           \
+        auto& operator*() { return m_; }                                    \
         MATMUL_DEF_DFX_FUNCS(m_, MODULE, __VA_ARGS__)                       \
     private:                                                                \
         MODULE& m_;                                                         \
     };                                                                      \
     auto operator->() { return &proxy; }                                    \
+    operator MODULE*() { return &(*proxy); }                                \
 private:                                                                    \
     FuncProxy proxy;                                                        \
 };                                                                          \
@@ -133,11 +136,13 @@ template <> struct MatmulDfxProxy<const MODULE> {                           \
     MatmulDfxProxy(const MODULE& module) : proxy{module} {}                 \
     struct FuncProxy {                                                      \
         FuncProxy(const MODULE& module) : m_{module} {}                     \
+        const auto& operator*() { return m_; }                              \
         MATMUL_DEF_DFX_FUNCS(m_, MODULE, __VA_ARGS__)                       \
     private:                                                                \
         const MODULE& m_;                                                   \
     };                                                                      \
     auto operator->() { return &proxy; }                                    \
+    operator MODULE*() { return &(*proxy); }                                \
 private:                                                                    \
     FuncProxy proxy;                                                        \
 }

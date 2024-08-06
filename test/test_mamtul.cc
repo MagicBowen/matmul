@@ -49,8 +49,6 @@ using BIAS_TYPE = MatmulType<TPosition::GM, CubeFormat::ND, uint16_t>;
 
 SCENARIO("Matmul Test") 
 {
-    TCubeTiling tiling;
-
     typename A_TYPE::T a[CFG_NORM.singleCoreM][CFG_NORM.singleCoreK] = {
         { 1, 2, 3, 4, 5, 6 },
         { 2, 2, 3, 4, 5, 6 },
@@ -92,6 +90,8 @@ SCENARIO("Matmul Test")
     tensorA.SetAddr(*a, CFG_NORM.singleCoreM * CFG_NORM.singleCoreK);
     tensorB.SetAddr(*b, CFG_NORM.singleCoreK * CFG_NORM.singleCoreN);
     tensorC.SetAddr(*c, CFG_NORM.singleCoreM * CFG_NORM.singleCoreN);
+
+    TCubeTiling tiling;
 
     GIVEN("MatmulImpl default") 
     {

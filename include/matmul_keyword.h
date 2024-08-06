@@ -9,6 +9,21 @@
 #include <type_traits>
 #include "dfx/matmul_dfx_cfg.h"
 
+namespace matmul {
+    struct MatmulNullBase {
+    };
+
+    template<typename MODULE, typename = void> 
+    struct matmul_module_base {
+        using type = MatmulNullBase;
+    };
+
+    template<typename MODULE>
+    struct matmul_module_base<MODULE, std::void_t<typename MODULE::BASE_MODULE>> {
+        using type = typename MODULE::BASE_MODULE;
+    };
+}
+
 /////////////////////////////////////////////////////////////////
 #define MATMUL_IMPL__ IMPL
 
@@ -94,16 +109,17 @@ MATMUL_PRIVATE_TEMPLATE<MATMUL_IMPL_TYPE, A_TYPE, B_TYPE, C_TYPE, BIAS_TYPE, MM_
 
 /////////////////////////////////////////////////////////////////
 #define MATMUL_ALLOW_USING(NAME)                                \
-friend typename MATMUL_MODULE_IN_POLICY(NAME);                  \
-using NAME = typename MATMUL_MODULE_IN_POLICY(NAME)
+using NAME = typename MATMUL_MODULE_IN_POLICY(NAME);            \
+friend typename matmul_module_base<NAME>::type;                 \
+friend NAME
 
 #define MATMUL_ALLOW_USING_TEMPLATE(NAME, ...)                  \
 using NAME = typename MATMUL_MODULE_IN_POLICY(template NAME<__VA_ARGS__>)
 
 /////////////////////////////////////////////////////////////////
 #define MATMUL_ALLOW_USING_PRIVATE(NAME)                        \
-friend typename MATMUL_MODULE_IN_PRIVATE(NAME);                 \
-using NAME = typename MATMUL_MODULE_IN_PRIVATE(NAME)
+using NAME = typename MATMUL_MODULE_IN_PRIVATE(NAME);           \
+friend NAME
 
 #define MATMUL_ALLOW_USING_TEMPLATE_PRIVATE(NAME, ...)          \
 using NAME = typename MATMUL_MODULE_IN_PRIVATE(template NAME<__VA_ARGS__>)

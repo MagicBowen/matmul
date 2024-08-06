@@ -31,6 +31,7 @@ class MatmulImpl
 , MATMUL_IMPORT_MODULE(MMad)
 , MATMUL_IMPORT_MODULE(Co1Buffer)
 , MATMUL_IMPORT_MODULE(CopyCubeOut)
+, MATMUL_IMPORT_MODULE(Context)
 , MATMUL_IMPORT_MODULE_PRIVATE(HalInstruction)
 {
     using L0cT = typename A_TYPE::T;
@@ -52,6 +53,7 @@ private:
     MATMUL_ALLOW_USING(MMad);
     MATMUL_ALLOW_USING(Co1Buffer);
     MATMUL_ALLOW_USING(CopyCubeOut);
+    MATMUL_ALLOW_USING(Context);
 
     template<InputTypeTag TAG>
     using CopyInBuffer = std::conditional_t<TAG == InputTypeTag::A, CopyInBufferA, CopyInBufferB>;
@@ -69,7 +71,7 @@ private:
     MATMUL_DFX_PROXY_REGISTER(MMad, Compute);
     MATMUL_DFX_PROXY_REGISTER(Co1Buffer, Init, Destroy, Alloc, Free, Get);
     MATMUL_DFX_PROXY_REGISTER(CopyCubeOut, Copy);
-    MATMUL_DFX_PROXY_REGISTER(HalInstruction, CopyND2NZ);
+    // MATMUL_DFX_PROXY_REGISTER(HalInstruction, CopyND2NZ);
 
 private:
     using IMPL = MATMUL_IMPL_TYPE;

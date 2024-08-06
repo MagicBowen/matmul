@@ -25,6 +25,7 @@ class CopyCubeIn {
 public:
     void Init() {
         MATMUL_MODULE(CopyInBuffer)->Init(L1_LOAD_SIZE, L1_BUFFER_NUM);
+        std::cout << "CopyCubeIn::Init, in common version" << std::endl;
     }
 
     void Destroy() {
@@ -73,12 +74,16 @@ private:
 
 /////////////////////////////////////////////////////////////////
 template<typename IMPL, typename INPUT_TYPE, const auto& MM_CFG>
-class CopyCubeIn<IMPL, INPUT_TYPE, MM_CFG, std::enable_if_t<PhyPosIsL1(INPUT_TYPE::Pos)>> {
+class CopyCubeIn<IMPL, INPUT_TYPE, MM_CFG, std::enable_if_t<PhyPosIsL1(INPUT_TYPE::pos)>> {
 
     using SrcT = typename INPUT_TYPE::INNER_T;
 
 public:
     void Init() {
+        std::cout << "CopyCubeIn::Init, in partial specialized version" << std::endl;
+    }
+
+    void Destroy() {
     }
 
     void SetAddr(const GlobalTensor<SrcT>& input) {
@@ -90,6 +95,7 @@ public:
 
     LocalTensor<SrcT>& Load(uint32_t row, uint32_t col) {
         LocalTensor<SrcT> tensor;
+        std::cout << "CopyCubeIn::Load, in partial specialized version" << std::endl;
         return tensor;
     }
 
