@@ -39,8 +39,8 @@ namespace {
         uint32_t value{0xABCD};
     };
 
-    template<typename IMPL, typename A_TYPE, typename B_TYPE, typename C_TYPE, typename BIAS_TYPE, const auto& MM_CFG, typename MM_CB>
-    struct MatmulPolicyCustomized : MatmulPolicyDefault<IMPL, A_TYPE, B_TYPE, C_TYPE, BIAS_TYPE, MM_CFG, MM_CB> {
+    template<const auto& MM_CFG, typename IMPL, typename A_TYPE, typename B_TYPE, typename C_TYPE, typename BIAS_TYPE>
+    struct MatmulPolicyCustomized : MatmulPolicyDefault<MM_CFG, IMPL, A_TYPE, B_TYPE, C_TYPE, BIAS_TYPE> {
         using CopyCubeInA = CustomizedCopyCubeIn<IMPL, MatmulInputTypeA<A_TYPE>, MM_CFG>;
         using Context     = CustomizedMatmulContext;
     };
@@ -61,9 +61,7 @@ SCENARIO("matmul extention test") {
 
     GIVEN("MatmulImpl customized") 
     {
-        MatmulImpl<A_TYPE, B_TYPE, C_TYPE, BIAS_TYPE, CFG_NORM, 
-                   MatmulCallBackFunc<nullptr, nullptr, nullptr>, 
-                   MatmulPolicyCustomized> mm;
+        MatmulImpl<A_TYPE, B_TYPE, C_TYPE, BIAS_TYPE, CFG_NORM, MatmulPolicyCustomized> mm;
                    
         mm.Init(&tiling);
 

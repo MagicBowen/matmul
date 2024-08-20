@@ -81,21 +81,11 @@ inline constexpr decltype(auto) MATMUL_MODULE(NAME) const {     \
 }
 
 /////////////////////////////////////////////////////////////////
-#define MATMUL_POLICY_TEMPLATE     MATMUL_POLICY
-
-#define MATMUL_POLICY_TEMPLATE_DEFAULT_OF(DEFAULT)              \
-template<typename, typename, typename, typename, typename,      \
-const auto& = MM_CFG, typename = MM_CB>                         \
-class MATMUL_POLICY_TEMPLATE = DEFAULT
-
-#define MATMUL_POLICY_TEMPLATE_OF(NAME)                         \
-template<typename, typename, typename, typename, typename, const auto&, typename> class NAME
-
 #define MATMUL_IMPL_TYPE                                        \
-MatmulImpl<A_TYPE, B_TYPE, C_TYPE, BIAS_TYPE, MM_CFG, MM_CB, MATMUL_POLICY_TEMPLATE>
+MatmulImpl<A_TYPE, B_TYPE, C_TYPE, BIAS_TYPE, MM_CFG, POLICY>
 
 #define MATMUL_MODULE_IN_POLICY(...)                            \
-MATMUL_POLICY_TEMPLATE<MATMUL_IMPL_TYPE, A_TYPE, B_TYPE, C_TYPE, BIAS_TYPE, MM_CFG, MM_CB>::__VA_ARGS__
+POLICY<MM_CFG, MATMUL_IMPL_TYPE, A_TYPE, B_TYPE, C_TYPE, BIAS_TYPE>::__VA_ARGS__
 
 #define MATMUL_IMPORT_MODULE(...)  private MATMUL_MODULE_IN_POLICY(__VA_ARGS__)
 

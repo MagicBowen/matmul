@@ -16,9 +16,12 @@
 
 namespace matmul {
 
-template <typename A_TYPE, typename B_TYPE, typename C_TYPE, typename BIAS_TYPE, 
-          const auto& MM_CFG = CFG_NORM, typename MM_CB = MatmulCallBackFunc<nullptr, nullptr, nullptr>, 
-          MATMUL_POLICY_TEMPLATE_DEFAULT_OF(MatmulPolicyDefault)>
+template <typename A_TYPE, 
+          typename B_TYPE, 
+          typename C_TYPE, 
+          typename BIAS_TYPE, 
+          const auto& MM_CFG = CFG_NORM, 
+          template<const auto& = MM_CFG, typename...> class POLICY = MatmulPolicyDefault>
 class MatmulImpl
 : MATMUL_IMPORT_MODULE(Scheduler)
 , MATMUL_IMPORT_MODULE(IterateController)

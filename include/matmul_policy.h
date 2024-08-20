@@ -19,7 +19,7 @@ namespace matmul {
 struct MatmulContext {
 };
 
-template<typename IMPL, typename A_TYPE, typename B_TYPE, typename C_TYPE, typename BIAS_TYPE, const auto& MM_CFG, typename MM_CB>
+template<const auto& MM_CFG, typename IMPL, typename A_TYPE, typename B_TYPE, typename C_TYPE, typename BIAS_TYPE>
 struct MatmulPolicyDefault {
 
     ////////////////////////////////////////////////////////////////////
