@@ -12,7 +12,6 @@
 #include "matmul_call_back.h"
 #include "matmul_policy.h"
 #include "matmul_private.h"
-// #include "dfx/matmul_dfx_proxy.h"
 
 namespace matmul {
 
@@ -25,6 +24,7 @@ template <typename A_TYPE,
 class MatmulImpl
 : MATMUL_IMPORT_MODULE(Scheduler)
 , MATMUL_IMPORT_MODULE(IterateController)
+, MATMUL_IMPORT_MODULE(Iterator)
 , MATMUL_IMPORT_MODULE(CopyCubeInA)
 , MATMUL_IMPORT_MODULE(CopyCubeInB)
 , MATMUL_IMPORT_MODULE(CopyInBufferA)
@@ -47,6 +47,7 @@ class MatmulImpl
 private:
     MATMUL_ALLOW_USING(Scheduler);
     MATMUL_ALLOW_USING(IterateController);
+    MATMUL_ALLOW_USING(Iterator);
     MATMUL_ALLOW_USING(CopyCubeInA);
     MATMUL_ALLOW_USING(CopyCubeInB);
     MATMUL_ALLOW_USING(CopyInBufferA);

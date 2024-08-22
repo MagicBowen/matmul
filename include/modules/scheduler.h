@@ -19,6 +19,7 @@ namespace matmul {
 template<typename IMPL, typename A_TYPE, typename B_TYPE, typename C_TYPE, const auto& MM_CFG>
 class Scheduler {
     MATMUL_USE_MODULE(IterateController);
+    MATMUL_USE_MODULE(Iterator);
     MATMUL_USE_MODULE(CopyCubeInA);
     MATMUL_USE_MODULE(CopyCubeInB);
     MATMUL_USE_MODULE(SplitLoadA);
@@ -63,23 +64,24 @@ public:
         return true;
     }
 
-    // bool ScheduleOnceSteam () {
-    //     return MATMUL_MODULE(IterateController)
-    //     ->Forward([this](auto row, auto col) {
-    //         auto tensorA = MATMUL_MODULE(CopyCubeInA)->Load(row, col);
-    //         auto tensorB = MATMUL_MODULE(CopyCubeInB)->Load(row, col);
-    //         auto tensorC = MATMUL_MODULE(Co1Buffer)->Alloc();
-    //     })
-    //     ->Reduce([this](auto m, auto n, auto k, auto tensorA, auto tensorB, auto tensorC) {
-    //         auto a = MATMUL_MODULE(SplitLoadA)->Split(tensorA, m, k);
-    //         auto b = MATMUL_MODULE(SplitLoadB)->Split(tensorB, k, n);
-    //         auto c = MATMUL_MODULE(SplitC)->Split(tensorC, m, n);
+    // bool ScheduleOnce() {
+    //     if (MATMUL_MODULE(Iterator)->IsFinished()) {
+    //         return false;
+    //     }
+
+    //     auto posA = MATMUL_MODULE(CopyCubeInA)->Load();
+    //     auto posB = MATMUL_MODULE(CopyCubeInB)->Load();
+        
+    //     MATMUL_MODULE(Iterator)->Reduce(posA, posB, [this](auto m, auto n, auto k) {
+    //         auto c = MATMUL_MODULE(Co1Buffer)->Alloc();
+    //         auto a = MATMUL_MODULE(SplitLoadA)->Split(tensorA, k);
+    //         auto b = MATMUL_MODULE(SplitLoadB)->Split(tensorB, k);
+
     //         MATMUL_MODULE(MMad)->Compute(c, a, b);
-    //     })
-    //     ->Submit([this](auto row, auto col) {
-    //         auto tensorA = MATMUL_MODULE(CopyCubeInA)->Clear(row, col);
-    //         auto tensorB = MATMUL_MODULE(CopyCubeInB)->Clear(row, col);
+
     //     });
+
+    //     return true;
     // }
 
     template <typename TENSOR>

@@ -30,6 +30,7 @@ struct MatmulPolicyDefault {
     ////////////////////////////////////////////////////////////////////
     using IterateController =   matmul::IterateController<IMPL, MM_CFG>;
 
+    using Iterator         =   matmul::Iterator<IMPL, MM_CFG>;
     using CopyCubeInA       =   matmul::CopyCubeIn<IMPL, INPUT_TYPE_A, MM_CFG>;
     using CopyCubeInB       =   matmul::CopyCubeIn<IMPL, INPUT_TYPE_B, MM_CFG>;
 

@@ -12,6 +12,7 @@ namespace matmul {
 
 template <typename IMPL, const auto& MM_CFG>
 class IterateController {
+    
     enum {
         ORDER_M = 0,
         ORDER_N = 1,
