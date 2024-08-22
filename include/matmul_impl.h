@@ -12,7 +12,7 @@
 #include "matmul_call_back.h"
 #include "matmul_policy.h"
 #include "matmul_private.h"
-#include "dfx/matmul_dfx_proxy.h"
+// #include "dfx/matmul_dfx_proxy.h"
 
 namespace matmul {
 
@@ -62,19 +62,10 @@ private:
     using CopyInBuffer = std::conditional_t<TAG == InputTypeTag::A, CopyInBufferA, CopyInBufferB>;
 
 private:
-    MATMUL_ALLOW_USING_PRIVATE(HalInstruction);
+    template<typename, typename> friend struct MatmulDfxProxy;
 
 private:
-    MATMUL_DFX_PROXY_REGISTER_DEFAULT();
-    MATMUL_DFX_PROXY_REGISTER(Scheduler, Init, Destroy, ScheduleOnce, Schedule);
-    MATMUL_DFX_PROXY_REGISTER(CopyCubeInA, Init, Destroy, SetAddr, Load, Clear);
-    MATMUL_DFX_PROXY_REGISTER(CopyCubeInB, Init, Destroy, SetAddr, Load, Clear);
-    MATMUL_DFX_PROXY_REGISTER(CopyInBufferA, Init, Destroy, Alloc, Free, Get);
-    MATMUL_DFX_PROXY_REGISTER(CopyInBufferB, Init, Destroy, Alloc, Free, Get);
-    MATMUL_DFX_PROXY_REGISTER(MMad, Compute);
-    MATMUL_DFX_PROXY_REGISTER(Co1Buffer, Init, Destroy, Alloc, Free, Get);
-    MATMUL_DFX_PROXY_REGISTER(CopyCubeOut, Copy);
-    // MATMUL_DFX_PROXY_REGISTER(HalInstruction, CopyND2NZ);
+    MATMUL_ALLOW_USING_PRIVATE(HalInstruction);
 
 private:
     using IMPL = MATMUL_IMPL_TYPE;

@@ -11,12 +11,11 @@
 namespace matmul {
 
 ///////////////////////////////////////////////////////////////////////////////
-#define MATMUL_DFX_PROXY_REGISTER_DEFAULT()                                 \
-template <typename T>                                                       \
-struct MatmulDfxProxy : T {                                                 \
-    auto operator->() { return this; }                                      \
-    operator T*() { return this; }                                          \
-}
+template <typename T, typename M>
+struct MatmulDfxProxy : M {
+    auto operator->() { return this; }
+    operator T*() { return this; }
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 #define MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC)                         \
@@ -118,7 +117,9 @@ MATMUL_DEF_DFX_FUNCS_IMPL(MATMUL_COUNT_ARGS(__VA_ARGS__), M_, MODULE, __VA_ARGS_
 
 ///////////////////////////////////////////////////////////////////////////////
 #define MATMUL_DFX_PROXY_REGISTER(MODULE, ...)                              \
-template <> struct MatmulDfxProxy<MODULE> {                                 \
+template <typename T>                                                       \
+struct MatmulDfxProxy<T, typename T::MODULE> {                              \
+    using MODULE = typename T::MODULE;                                      \
     MatmulDfxProxy(MODULE& module) : proxy{module} {}                       \
     struct FuncProxy {                                                      \
         FuncProxy(MODULE& module) : m_{module} {}                           \
@@ -132,7 +133,9 @@ template <> struct MatmulDfxProxy<MODULE> {                                 \
 private:                                                                    \
     FuncProxy proxy;                                                        \
 };                                                                          \
-template <> struct MatmulDfxProxy<const MODULE> {                           \
+template <typename T>                                                       \
+struct MatmulDfxProxy<const T, typename T::MODULE> {                        \
+    using MODULE = typename T::MODULE;                                      \
     MatmulDfxProxy(const MODULE& module) : proxy{module} {}                 \
     struct FuncProxy {                                                      \
         FuncProxy(const MODULE& module) : m_{module} {}                     \

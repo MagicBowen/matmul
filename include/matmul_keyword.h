@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 #include <type_traits>
-#include "dfx/matmul_dfx_cfg.h"
+#include "dfx/matmul_dfx_registry.h"
 
 namespace matmul {
     struct MatmulNullBase {
@@ -26,6 +26,7 @@ namespace matmul {
 
 /////////////////////////////////////////////////////////////////
 #define MATMUL_IMPL__ IMPL
+#define MATMUL_POLICY__ POLICY
 
 #define MATMUL_CAST_TO_IMPL()                                   \
 static_cast<MATMUL_IMPL__*>(this)
@@ -40,10 +41,10 @@ static_cast<const MATMUL_IMPL__*>(this)
 (static_cast<const typename MATMUL_IMPL__::__VA_ARGS__*>(MATMUL_CAST_TO_CONST_IMPL()))
 
 #define MATMUL_CAST_TO_PROXY_OF(NAME)                           \
-typename MATMUL_IMPL__::template MatmulDfxProxy<typename IMPL::NAME> {*MATMUL_CAST_TO_IMPL_OF(NAME)}; 
+typename matmul::MatmulDfxProxy<MATMUL_IMPL__, typename MATMUL_IMPL__::NAME> {*MATMUL_CAST_TO_IMPL_OF(NAME)}; 
 
 #define MATMUL_CAST_TO_CONST_PROXY_OF(NAME)                     \
-typename MATMUL_IMPL__::template MatmulDfxProxy<const typename IMPL::NAME> {*MATMUL_CAST_TO_CONST_IMPL_OF(NAME)}; 
+typename matmul::MatmulDfxProxy<const MATMUL_IMPL__, typename MATMUL_IMPL__::NAME> {*MATMUL_CAST_TO_CONST_IMPL_OF(NAME)}; 
 
 /////////////////////////////////////////////////////////////////
 #define MATMUL_MODULE(NAME)      cast_to_##NAME()
@@ -82,10 +83,10 @@ inline constexpr decltype(auto) MATMUL_MODULE(NAME) const {     \
 
 /////////////////////////////////////////////////////////////////
 #define MATMUL_IMPL_TYPE                                        \
-MatmulImpl<A_TYPE, B_TYPE, C_TYPE, BIAS_TYPE, MM_CFG, POLICY>
+MatmulImpl<A_TYPE, B_TYPE, C_TYPE, BIAS_TYPE, MM_CFG, MATMUL_POLICY__>
 
 #define MATMUL_MODULE_IN_POLICY(...)                            \
-POLICY<MM_CFG, MATMUL_IMPL_TYPE, A_TYPE, B_TYPE, C_TYPE, BIAS_TYPE>::__VA_ARGS__
+MATMUL_POLICY__<MM_CFG, MATMUL_IMPL_TYPE, A_TYPE, B_TYPE, C_TYPE, BIAS_TYPE>::__VA_ARGS__
 
 #define MATMUL_IMPORT_MODULE(...)  private MATMUL_MODULE_IN_POLICY(__VA_ARGS__)
 
