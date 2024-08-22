@@ -11,7 +11,7 @@ namespace {
     public:
         using BASE_MODULE = matmul::CopyCubeIn<IMPL, INPUT_TYPE, MM_CFG>;
     public:
-        LocalTensor<SrcT> Load(uint32_t row, uint32_t col) {
+        LocalTensor<SrcT> Load() {
             LocalTensor<SrcT> result;
             std::cout << "CustomizedCopyCubeIn::Load" << std::endl;
             std::cout << "Context value = " << MATMUL_MODULE(Context)->value  << std::endl;
@@ -27,7 +27,7 @@ namespace {
     public:
         using BASE_MODULE = matmul::CopyCubeIn<IMPL, INPUT_TYPE, MM_CFG>;
     public:
-        LocalTensor<SrcT> Load(uint32_t row, uint32_t col) {
+        LocalTensor<SrcT> Load() {
             LocalTensor<SrcT> result;
             std::cout << "CustomizedCopyCubeIn::Load, in partial specialized version" << std::endl;
             std::cout << "Context value = " << MATMUL_MODULE(Context)->value  << std::endl;

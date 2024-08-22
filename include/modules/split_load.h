@@ -13,7 +13,7 @@ template<typename INPUT_TYPE, const auto& MM_CFG>
 class SplitLoad {
     using SrcT = typename INPUT_TYPE::INNER_T;
 public:
-    LocalTensor<SrcT> Split(LocalTensor<SrcT>& input, uint32_t offset) {
+    LocalTensor<SrcT> Load(LocalTensor<SrcT>& input, uint32_t offset) {
         return input;
     }
 };

@@ -39,22 +39,22 @@ public:
     void SetAddr(const LocalTensor<SrcT>& input) {
     }
 
-    LocalTensor<SrcT> Load(uint32_t row, uint32_t col) {
-        uint32_t stepIdx = InputTypeTraits<INPUT_TYPE, MM_CFG>::GetBufferStepIndex(row, col);
-        if (stepIdx == 0) {
-            if (cacheTensor.GetAddr()) {
-                MATMUL_MODULE(CopyInBuffer)->Free(cacheTensor);
-            }
-            cacheTensor = MATMUL_MODULE(CopyInBuffer)->Alloc();
+    LocalTensor<SrcT> Load() {
+        // uint32_t stepIdx = InputTypeTraits<INPUT_TYPE, MM_CFG>::GetBufferStepIndex(row, col);
+        // if (stepIdx == 0) {
+        //     if (cacheTensor.GetAddr()) {
+        //         MATMUL_MODULE(CopyInBuffer)->Free(cacheTensor);
+        //     }
+        //     cacheTensor = MATMUL_MODULE(CopyInBuffer)->Alloc();
 
-            GlobalTensor<SrcT> srcTensor;
-            srcTensor.SetAddr(addr + InputTypeTraits<INPUT_TYPE, MM_CFG>::GetOffsetFromOrigin(row, col), L1_LOAD_SIZE);
+        //     GlobalTensor<SrcT> srcTensor;
+        //     srcTensor.SetAddr(addr + InputTypeTraits<INPUT_TYPE, MM_CFG>::GetOffsetFromOrigin(row, col), L1_LOAD_SIZE);
 
-            MATMUL_MODULE(HalInstruction)->CopyND2NZ(cacheTensor, srcTensor, L1_LOAD_SIZE);
-        } 
+        //     MATMUL_MODULE(HalInstruction)->CopyND2NZ(cacheTensor, srcTensor, L1_LOAD_SIZE);
+        // } 
         
         LocalTensor<SrcT> result;
-        result.SetAddr(cacheTensor.GetAddr() + stepIdx * ONE_STEP_CACHE_SIZE, ONE_STEP_CACHE_SIZE);
+        // result.SetAddr(cacheTensor.GetAddr() + stepIdx * ONE_STEP_CACHE_SIZE, ONE_STEP_CACHE_SIZE);
         return result;
     }
 
@@ -93,7 +93,7 @@ public:
         addr = input.GetAddr();
     }
 
-    LocalTensor<SrcT>& Load(uint32_t row, uint32_t col) {
+    LocalTensor<SrcT>& Load() {
         LocalTensor<SrcT> tensor;
         std::cout << "CopyCubeIn::Load, in partial specialized version" << std::endl;
         return tensor;

@@ -7,6 +7,7 @@
 
 #include "modules/scheduler.h"
 #include "modules/iterate_controller.h"
+#include "modules/iterator.h"
 #include "modules/copy_cube_in.h"
 #include "modules/copy_in_buffer.h"
 #include "modules/split_load.h"
@@ -30,7 +31,7 @@ struct MatmulPolicyDefault {
     ////////////////////////////////////////////////////////////////////
     using IterateController =   matmul::IterateController<IMPL, MM_CFG>;
 
-    using Iterator         =   matmul::Iterator<IMPL, MM_CFG>;
+    using Iterator          =   matmul::Iterator<IMPL, MM_CFG>;
     using CopyCubeInA       =   matmul::CopyCubeIn<IMPL, INPUT_TYPE_A, MM_CFG>;
     using CopyCubeInB       =   matmul::CopyCubeIn<IMPL, INPUT_TYPE_B, MM_CFG>;
 

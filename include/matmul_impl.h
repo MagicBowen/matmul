@@ -113,15 +113,15 @@ public:
     }
 
     bool Iterate() {
-        return MATMUL_MODULE(Scheduler)->ScheduleOnce();
+        return MATMUL_MODULE(Scheduler)->Schedule();
     }
 
     void IterateAll(GlobalTensor<DstT>& tensor) {
-        return MATMUL_MODULE(Scheduler)->Schedule(tensor);
+        return MATMUL_MODULE(Scheduler)->ScheduleAll(tensor);
     }
 
     void IterateAll(LocalTensor<DstT>& tensor) {
-        return MATMUL_MODULE(Scheduler)->Schedule(tensor);
+        return MATMUL_MODULE(Scheduler)->ScheduleAll(tensor);
     }
 
 private:

@@ -12,38 +12,57 @@ namespace matmul {
 
 template <typename IMPL, const auto& MM_CFG>
 class Iterator {
-
-    enum {
-        ORDER_M = 0,
-        ORDER_N = 1,
-        ORDER_MAX
-    };
-
-    struct State {
-        void Reset(uint32_t stepNum, uint32_t iterNum) {
-            curIdx_ = 0;
-            stepIdx_ = 0;
-            curStep_ = stepNum;
-            iterNum_ = iterNum;
-        }
-
-        uint32_t curIdx_{0};
-        uint32_t stepIdx_{0};
-        uint32_t curStep_{0};
-        uint32_t iterNum_{0};
-    } state_[ORDER_MAX];
-
-    static constexpr uint32_t MAIN_ORDER = 
-        (MM_CFG.iterateOrder == IterateOrder::ORDER_M) ? ORDER_M : ORDER_N;
-        
-    static constexpr uint32_t SUB_ORDER = 
-        (MM_CFG.iterateOrder == IterateOrder::ORDER_M) ? ORDER_N : ORDER_M;
-
 public:
-    bool IsFinished() const {
-        return (state_[SUB_ORDER].stepIdx_ >= state_[SUB_ORDER].iterNum_)
-        && (state_[MAIN_ORDER].curIdx_ >= state_[MAIN_ORDER].iterNum_);
+    void Init(IterateOrder order, uint32_t mIter, uint32_t nIter, uint32_t kIter) {
+        order_ = order;
+        mIter_ = mIter;
+        nIter_ = nIter;
+        kIter_ = kIter;
+        Reset();
     }
+
+    template<typename EXECUTE>
+    void Forward(size_t step, EXECUTE execute) {
+        for (uint32_t i = 0; i < step; ++i) {
+            execute(m_, n_, k_);
+            if (!MoveNext()) break;
+        }
+    }
+
+    void Reset() {
+        m_ = 0;
+        n_ = 0;
+        k_ = 0;
+    }
+
+    bool End() const {
+        return m_ >= mIter_ && n_ >= nIter_;
+    }
+
+private:
+    bool MoveNext() {
+        if (++k_ >= kIter_) {
+            k_ = 0;
+            if (++n_ >= nIter_) {
+                n_ = 0;
+                if (++m_ >= mIter_) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+private:
+    IterateOrder order_;
+
+    uint32_t mIter_;
+    uint32_t nIter_;
+    uint32_t kIter_;
+
+    uint32_t m_;
+    uint32_t n_;
+    uint32_t k_;
 };
 
 } // namespace matmul
