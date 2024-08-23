@@ -9,7 +9,7 @@
 
 namespace matmul {
 
-struct MatmulDfxFuncInfo {
+struct DfxFuncInfo {
     const char* module;
     const char* func;
     uint32_t funcId;

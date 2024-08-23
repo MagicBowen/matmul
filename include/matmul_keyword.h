@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 #include <type_traits>
-#include "dfx/matmul_dfx_registry.h"
+#include "dfx/dfx_registry.h"
 
 namespace matmul {
     struct MatmulNullBase {
@@ -51,14 +51,14 @@ typename matmul::MatmulDfxProxy<const MATMUL_IMPL__, typename MATMUL_IMPL__::NAM
 
 #define MATMUL_USE_MODULE(NAME)                                 \
 inline constexpr decltype(auto) MATMUL_MODULE(NAME) {           \
-    if constexpr (MatmulDfxCfg::ENABLE) {                       \
+    if constexpr (DfxConfig::ENABLE) {                          \
         return MATMUL_CAST_TO_PROXY_OF(NAME);                   \
     } else {                                                    \
         return MATMUL_CAST_TO_IMPL_OF(NAME);                    \
     }                                                           \
 }                                                               \
 inline constexpr decltype(auto) MATMUL_MODULE(NAME) const {     \
-    if constexpr (MatmulDfxCfg::ENABLE) {                       \
+    if constexpr (DfxConfig::ENABLE) {                          \
         return MATMUL_CAST_TO_CONST_PROXY_OF(NAME);             \
     } else {                                                    \
         return MATMUL_CAST_TO_CONST_IMPL_OF(NAME);              \
@@ -67,14 +67,14 @@ inline constexpr decltype(auto) MATMUL_MODULE(NAME) const {     \
 
 #define MATMUL_USE_MODULE_ON(NAME, ...)                         \
 inline constexpr decltype(auto) MATMUL_MODULE(NAME) {           \
-    if constexpr (MatmulDfxCfg::ENABLE) {                       \
+    if constexpr (DfxConfig::ENABLE) {                          \
         return MATMUL_CAST_TO_PROXY_OF(template NAME<__VA_ARGS__>);\
     } else {                                                    \
         return MATMUL_CAST_TO_IMPL_OF(template NAME<__VA_ARGS__>); \
     }                                                           \
 }                                                               \
 inline constexpr decltype(auto) MATMUL_MODULE(NAME) const {     \
-    if constexpr (MatmulDfxCfg::ENABLE) {                       \
+    if constexpr (DfxConfig::ENABLE) {                          \
         return MATMUL_CAST_TO_CONST_PROXY_OF(template NAME<__VA_ARGS__>);\
     } else {                                                    \
         return MATMUL_CAST_TO_CONST_IMPL_OF(template NAME<__VA_ARGS__>); \

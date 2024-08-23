@@ -6,7 +6,7 @@
 #define MATMUL_DFX_PROXY_H
 
 #include <type_traits>
-#include "dfx/matmul_dfx_handler.h"
+#include "dfx/dfx_handler.h"
 
 namespace matmul {
 
@@ -23,19 +23,19 @@ template <typename... Args>                                                 \
 auto FUNC(Args&&... args) -> std::enable_if_t<!std::is_void_v<              \
 decltype((MODULE().MODULE::FUNC)(std::forward<Args>(args)...))>,            \
 decltype((MODULE().MODULE::FUNC)(std::forward<Args>(args)...))>{            \
-    constexpr MatmulDfxFuncInfo info{#MODULE, #FUNC, __COUNTER__};          \
-    MatmulDfxHandler::PreCall(info, std::forward<Args>(args)...);           \
+    constexpr DfxFuncInfo info{#MODULE, #FUNC, __COUNTER__};                \
+    DfxHandler::PreCall(info, std::forward<Args>(args)...);                 \
     auto ret = (M_.MODULE::FUNC)(std::forward<Args>(args)...);              \
-    MatmulDfxHandler::PostCall(info, ret);                                  \
+    DfxHandler::PostCall(info, ret);                                        \
     return ret;                                                             \
 }                                                                           \
 template <typename... Args>                                                 \
 auto FUNC(Args&&... args) -> std::enable_if_t<std::is_void_v<               \
 decltype((MODULE().MODULE::FUNC)(std::forward<Args>(args)...))>> {          \
-    constexpr MatmulDfxFuncInfo info{#MODULE, #FUNC, __COUNTER__};          \
-    MatmulDfxHandler::PreCall(info, std::forward<Args>(args)...);           \
+    constexpr DfxFuncInfo info{#MODULE, #FUNC, __COUNTER__};                \
+    DfxHandler::PreCall(info, std::forward<Args>(args)...);                 \
     (M_.MODULE::FUNC)(std::forward<Args>(args)...);                         \
-    MatmulDfxHandler::PostCall(info);                                       \
+    DfxHandler::PostCall(info);                                             \
 }   
 
 ///////////////////////////////////////////////////////////////////////////////

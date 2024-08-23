@@ -2,22 +2,22 @@
 * Copyright (c) wangbo@joycode.art 2024
 */
 
-#ifndef MATMUL_DFX_PRINT_HANDLE_H
-#define MATMUL_DFX_PRINT_HANDLE_H
+#ifndef MATMUL_DFX_TRACE_HANDLE_H
+#define MATMUL_DFX_TRACE_HANDLE_H
 
 #include <iostream>
-#include "dfx/matmul_dfx_func_info.h"
+#include "dfx/dfx_func_info.h"
 
 namespace matmul {
 
-inline std::ostream& operator<<(std::ostream& os, const MatmulDfxFuncInfo& info) {
+inline std::ostream& operator<<(std::ostream& os, const DfxFuncInfo& info) {
     os << "function(" << info.module << "::" << info.func << ", " << info.funcId << ")";
     return os;
 }
 
-struct MatmulDfxPrintHandler {
+struct DfxTraceHandler {
     template<typename... Args>
-    static void PreCall(const MatmulDfxFuncInfo& info, Args&&... args) {
+    static void PreCall(const DfxFuncInfo& info, Args&&... args) {
         std::cout << "------------------------------------------------" << std::endl;
         std::cout << "【DFX FUNCTION ENTER】: " << info << ", params(";
         if constexpr (sizeof...(args) > 0) {
@@ -29,12 +29,12 @@ struct MatmulDfxPrintHandler {
     }
 
     template<typename RT>
-    static void PostCall(const MatmulDfxFuncInfo& info, const RT& ret) {
+    static void PostCall(const DfxFuncInfo& info, const RT& ret) {
         std::cout  << "【DFX FUNCTION EXIT 】: " << info << ", return(" << ret << ")" << std::endl;
         std::cout << "------------------------------------------------" << std::endl;
     }
 
-    static void PostCall(const MatmulDfxFuncInfo& info) {
+    static void PostCall(const DfxFuncInfo& info) {
         std::cout  << "【DFX FUNCTION EXIT 】: " << info << ", return(void)" <<  std::endl;
         std::cout << "------------------------------------------------" << std::endl;
     }

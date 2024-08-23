@@ -7,21 +7,21 @@
 
 namespace matmul {
 
-struct MatmulDfxFuncInfo;
+struct DfxFuncInfo;
 
 template<typename ...HANDLERS> 
-struct MatmulDfxChainHandler {
+struct DfxChainHandler {
     template<typename... Args>
-    static void PreCall(const MatmulDfxFuncInfo& info, Args&&... args) {
+    static void PreCall(const DfxFuncInfo& info, Args&&... args) {
         (HANDLERS::PreCall(info, std::forward<Args>(args)...), ...);
     }
 
     template<typename RT>
-    static void PostCall(const MatmulDfxFuncInfo& info, const RT& ret) {
+    static void PostCall(const DfxFuncInfo& info, const RT& ret) {
         (HANDLERS::PostCall(info, ret), ...);
     }
 
-    static void PostCall(const MatmulDfxFuncInfo& info) {
+    static void PostCall(const DfxFuncInfo& info) {
         (HANDLERS::PostCall(info), ...);
     }
 };

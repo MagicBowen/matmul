@@ -112,6 +112,6 @@ SCENARIO("Matmul Test")
         
         mm.End();
 
-        MatmulDfxStatisticHandler::PrintStatistic();
+        DfxStatisticHandler::Print();
     }
 }

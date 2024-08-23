@@ -7,24 +7,24 @@
 
 #include <iostream>
 #include <unordered_map>
-#include "dfx/matmul_dfx_func_info.h"
+#include "dfx/dfx_func_info.h"
 
 namespace matmul {
 
-struct MatmulDfxStatisticHandler {
+struct DfxStatisticHandler {
     template<typename... Args>
-    static void PreCall(const MatmulDfxFuncInfo& info, Args&&... args) {
+    static void PreCall(const DfxFuncInfo& info, Args&&... args) {
         funcCallCounts_[GetFullFuncName(info.module, info.func)]++;
     }
 
     template<typename RT>
-    static void PostCall(const MatmulDfxFuncInfo& info, const RT& ret) {
+    static void PostCall(const DfxFuncInfo& info, const RT& ret) {
     }
 
-    static void PostCall(const MatmulDfxFuncInfo& info) {
+    static void PostCall(const DfxFuncInfo& info) {
     }
 
-    static void PrintStatistic() {
+    static void Print() {
         std::cout << "------------------------------------------------" << std::endl;
         std::cout << "【DFX FUNCTION STATISTIC】 " << std::endl;
         for (const auto& [func, count] : funcCallCounts_) {

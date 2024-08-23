@@ -18,7 +18,7 @@ namespace matmul {
 
 template<typename IMPL, typename A_TYPE, typename B_TYPE, typename C_TYPE, const auto& MM_CFG>
 class Scheduler {
-    MATMUL_USE_MODULE(IterateController);
+    // MATMUL_USE_MODULE(IterateController);
     MATMUL_USE_MODULE(Iterator);
     MATMUL_USE_MODULE(CopyCubeInA);
     MATMUL_USE_MODULE(CopyCubeInB);
@@ -30,7 +30,7 @@ class Scheduler {
 
 public:
     void Init(const TCubeTiling* tiling) {
-        MATMUL_MODULE(IterateController)->Init();
+        // MATMUL_MODULE(IterateController)->Init();
         MATMUL_MODULE(CopyCubeInA)->Init();
         MATMUL_MODULE(CopyCubeInB)->Init();
         MATMUL_MODULE(Co1Buffer)->Init();

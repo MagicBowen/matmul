@@ -78,6 +78,6 @@ SCENARIO("matmul extention test") {
         
         mm.End();
 
-        MatmulDfxStatisticHandler::PrintStatistic();
+        DfxStatisticHandler::Print();
     }
 }
