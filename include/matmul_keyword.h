@@ -41,10 +41,10 @@ static_cast<const MATMUL_IMPL__*>(this)
 (static_cast<const typename MATMUL_IMPL__::__VA_ARGS__*>(MATMUL_CAST_TO_CONST_IMPL()))
 
 #define MATMUL_CAST_TO_PROXY_OF(NAME)                           \
-typename matmul::MatmulDfxProxy<MATMUL_IMPL__, typename MATMUL_IMPL__::NAME> {*MATMUL_CAST_TO_IMPL_OF(NAME)}; 
+typename matmul::DfxProxy<MATMUL_IMPL__, typename MATMUL_IMPL__::NAME> {*MATMUL_CAST_TO_IMPL_OF(NAME)}; 
 
 #define MATMUL_CAST_TO_CONST_PROXY_OF(NAME)                     \
-typename matmul::MatmulDfxProxy<const MATMUL_IMPL__, typename MATMUL_IMPL__::NAME> {*MATMUL_CAST_TO_CONST_IMPL_OF(NAME)}; 
+typename matmul::DfxProxy<const MATMUL_IMPL__, typename MATMUL_IMPL__::NAME> {*MATMUL_CAST_TO_CONST_IMPL_OF(NAME)}; 
 
 /////////////////////////////////////////////////////////////////
 #define MATMUL_MODULE(NAME)      cast_to_##NAME()

@@ -11,18 +11,18 @@
 namespace matmul {
 
 ///////////////////////////////////////////////////////////////////////////////
-template <typename T, typename M>
-struct MatmulDfxProxy : M {
+template <typename IMPL, typename MODULE>
+struct DfxProxy : MODULE {
     auto operator->() { return this; }
-    operator T*() { return this; }
+    operator MODULE*() { return this; }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 #define MATMUL_DEF_DFX_PROXY_FUNC(M_, MODULE, FUNC)                         \
 template <typename... Args>                                                 \
 auto FUNC(Args&&... args) -> std::enable_if_t<!std::is_void_v<              \
-decltype((MODULE().MODULE::FUNC)(std::forward<Args>(args)...))>,            \
-decltype((MODULE().MODULE::FUNC)(std::forward<Args>(args)...))>{            \
+decltype(MODULE().MODULE::FUNC(std::forward<Args>(args)...))>,              \
+decltype(MODULE().MODULE::FUNC(std::forward<Args>(args)...))> {             \
     constexpr DfxFuncInfo info{#MODULE, #FUNC, __COUNTER__};                \
     DfxHandler::PreCall(info, std::forward<Args>(args)...);                 \
     auto ret = (M_.MODULE::FUNC)(std::forward<Args>(args)...);              \
@@ -31,7 +31,7 @@ decltype((MODULE().MODULE::FUNC)(std::forward<Args>(args)...))>{            \
 }                                                                           \
 template <typename... Args>                                                 \
 auto FUNC(Args&&... args) -> std::enable_if_t<std::is_void_v<               \
-decltype((MODULE().MODULE::FUNC)(std::forward<Args>(args)...))>> {          \
+decltype(MODULE().MODULE::FUNC(std::forward<Args>(args)...))>> {            \
     constexpr DfxFuncInfo info{#MODULE, #FUNC, __COUNTER__};                \
     DfxHandler::PreCall(info, std::forward<Args>(args)...);                 \
     (M_.MODULE::FUNC)(std::forward<Args>(args)...);                         \
@@ -117,10 +117,10 @@ MATMUL_DEF_DFX_FUNCS_IMPL(MATMUL_COUNT_ARGS(__VA_ARGS__), M_, MODULE, __VA_ARGS_
 
 ///////////////////////////////////////////////////////////////////////////////
 #define MATMUL_DFX_PROXY_REGISTER(MODULE, ...)                              \
-template <typename T>                                                       \
-struct MatmulDfxProxy<T, typename T::MODULE> {                              \
-    using MODULE = typename T::MODULE;                                      \
-    MatmulDfxProxy(MODULE& module) : proxy{module} {}                       \
+template <typename IMPL>                                                    \
+struct DfxProxy<IMPL, typename IMPL::MODULE> {                              \
+    using MODULE = typename IMPL::MODULE;                                   \
+    DfxProxy(MODULE& module) : proxy{module} {}                             \
     struct FuncProxy {                                                      \
         FuncProxy(MODULE& module) : m_{module} {}                           \
         auto& operator*() { return m_; }                                    \
@@ -133,10 +133,10 @@ struct MatmulDfxProxy<T, typename T::MODULE> {                              \
 private:                                                                    \
     FuncProxy proxy;                                                        \
 };                                                                          \
-template <typename T>                                                       \
-struct MatmulDfxProxy<const T, typename T::MODULE> {                        \
-    using MODULE = typename T::MODULE;                                      \
-    MatmulDfxProxy(const MODULE& module) : proxy{module} {}                 \
+template <typename IMPL>                                                    \
+struct DfxProxy<const IMPL, typename IMPL::MODULE> {                        \
+    using MODULE = typename IMPL::MODULE;                                   \
+    DfxProxy(const MODULE& module) : proxy{module} {}                       \
     struct FuncProxy {                                                      \
         FuncProxy(const MODULE& module) : m_{module} {}                     \
         const auto& operator*() { return m_; }                              \

@@ -63,7 +63,7 @@ private:
     using CopyInBuffer = std::conditional_t<TAG == InputTypeTag::A, CopyInBufferA, CopyInBufferB>;
 
 private:
-    template<typename, typename> friend struct MatmulDfxProxy;
+    template<typename, typename> friend struct DfxProxy;
 
 private:
     MATMUL_ALLOW_USING_PRIVATE(HalInstruction);
