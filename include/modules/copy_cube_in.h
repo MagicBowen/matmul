@@ -26,6 +26,9 @@ public:
     void Init() {
         MATMUL_MODULE(CopyInBuffer)->Init(L1_LOAD_SIZE, L1_BUFFER_NUM);
         std::cout << "CopyCubeIn::Init, in common version" << std::endl;
+
+        // typename IMPL::HalInstruction* hal = MATMUL_MODULE(HalInstruction);
+        // const typename IMPL:: template CopyInBuffer<INPUT_TYPE::TAG>* buffer = MATMUL_MODULE(CopyInBuffer);
     }
 
     void Destroy() {
